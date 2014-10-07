@@ -20,7 +20,7 @@ int main(int argc,char **argv)
   int *N;
   const int scriptsize=6;
   char **scriptinfo;
-  double t,t0,tf,dt,h,kh,dist,s,ni,S,a,H,u0sqr;
+  double t,t0,tf,dt,h,kh,dist,s,ni,S,a,H,E_T,u0sqr;
   double uTF,gammaF,wF,uzF,BF,phi0,sgn;
   double *x,*displ;
   double *Pc,step,graph_size;
@@ -129,6 +129,7 @@ int main(int argc,char **argv)
   
   dadosH=fopen("gfc/Deposit_check.dat","w");
   count=0;
+  E_T=0.0;
   for(t=t0;t<=tf;t+=dt){
     /*printf("loop - t=%.12f\n",t);*/
     if(count%4==0)
@@ -142,13 +143,15 @@ int main(int argc,char **argv)
         break;
     }
     
-    /*
+    
     H=0.0;
     for(i=0;i<N_sph;i+=1){
       u0sqr=(sph_eq[i].p.u[0])*(sph_eq[i].p.u[0]);
       H += ((sph_eq[i].p.ni)/(sph_eq[i].p.rho))*((sph_eq[i].p.e_p+sph_eq[i].p.p_p)*u0sqr-sph_eq[i].p.p_p);
     }
-    fprintf(dadosH,"%f %f\n",t,H);*/
+    E_T += dt*H;
+    fprintf(dadosH,"%f %f\n",t,H+E_T);
+    
     if( (count%40)==0 || 
         count == 0 || count == 8 || count == 16 || 
         count == 32 || count == 48 || count == 56){

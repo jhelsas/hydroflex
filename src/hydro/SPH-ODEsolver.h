@@ -31,7 +31,8 @@ int RK2(int D,double t,double dt,double h,double kh,
         int Deriv(double ,int ,int ,int ,int *,double ,double ,
               SPHeq_list *,SPHneq_list **,Box *,
               double (*)(double,double),double (*)(double,double),
-              SPHeq_list *,SPHneq_list **)
+              SPHeq_list *,SPHneq_list **),
+        double *Pt
        );
        
 int RK4(int D,double t,double dt,double h,double kh,

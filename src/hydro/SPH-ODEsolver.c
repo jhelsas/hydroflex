@@ -424,11 +424,12 @@ int HE2(int D,double t,double dt,double h,double kh,
         int Deriv(double ,int ,int ,int ,int *,double ,double ,
               SPHeq_list *,SPHneq_list **,Box *,
               double (*)(double,double),double (*)(double,double),
-              SPHeq_list *,SPHneq_list **)
+              SPHeq_list *,SPHneq_list **),
+        double *Pt
        )
 {
-  int i,j,k,l,err;
-  
+  int i,j,k,l,err,pt0[D+1],pt1[D+1];
+      
   err=Deriv(t,D,N_sph,Nspecies,N,h,kh,sph_eq,sph_neq,lbox,w,Dw,f0_eq,f0_neq);
   if(err!=0)
     return 2;
@@ -465,16 +466,16 @@ int HE2(int D,double t,double dt,double h,double kh,
       f0_neq[k][i].p.N_p *= dt; f0_neq[k][i].p.N_p+=sph_neq[k][i].p.N_p;
 	}
 	
-	err=setup(D,t+dt,h,kh,N_sph,sph_eqTemp,Nspecies,N,sph_neqTemp,lbox,w,EoS);
+  err=setup(D,t+dt,h,kh,N_sph,sph_eqTemp,Nspecies,N,sph_neqTemp,lbox,w,EoS);
   if(err!=0){
     printf("erro no setup \nerr=%d\nD=%d\n",err,D);
     return 3;
   }
   
   err=Deriv(t+dt,D,N_sph,Nspecies,N,h,kh,sph_eqTemp,sph_neqTemp,lbox,w,Dw,f1_eq,f1_neq);
-  
   if(err!=0)
     return 4;
+  
   for(i=0;i<N_sph;i+=1){
     
     sph_eq[i].p.Sa = sph_eq[i].p.S; /* freezeout variables*/
@@ -504,6 +505,27 @@ int HE2(int D,double t,double dt,double h,double kh,
       f1_neq[k][i].p.N_p *= dt; f1_neq[k][i].p.N_p+=sph_neq[k][i].p.N_p;
       sph_neq[k][i].p.N_p = (f0_neq[k][i].p.N_p+f1_neq[k][i].p.N_p)/2.0;
     }
+  
+  /*
+   * 4-momentum Conservation Check
+   */
+      
+  for(l=0;l<=D;l+=1){
+    pt0[l] = 0.; pt1[l] = 0.;
+  }
+  
+  for(i=0;i<N_sph;i+=1){
+    pt0[0] += ((f0_eq[i].p.ni)/(f0_eq[i].p.rho))*((f0_eq[i].p.e_p+f0_eq[i].p.p_p)*(f0_eq[i].p.u[0])*(f0_eq[i].p.u[0])-f0_eq[i].p.p_p);
+    pt1[0] += ((f1_eq[i].p.ni)/(f1_eq[i].p.rho))*((f1_eq[i].p.e_p+f1_eq[i].p.p_p)*(f1_eq[i].p.u[0])*(f1_eq[i].p.u[0])-f1_eq[i].p.p_p);
+    for(l=1;l<=D;l+=1){
+      pt0[l] += ((f0_eq[i].p.ni)/(f0_eq[i].p.rho))*(f0_eq[i].p.e_p+f0_eq[i].p.p_p)*(f0_eq[i].p.u[0])*(f0_eq[i].p.u[l]);
+      pt0[l] += ((f1_eq[i].p.ni)/(f1_eq[i].p.rho))*(f1_eq[i].p.e_p+f1_eq[i].p.p_p)*(f1_eq[i].p.u[0])*(f1_eq[i].p.u[l]);
+    }
+  }
+    
+  for(l=0;l<=D;l+=1)
+    Pt[l] += (1./2.)*( pt0[l]/t + pt1[l]/(t+dt) );
+  
   return 0;
 }
 

@@ -130,6 +130,8 @@ int main(int argc,char **argv)
   dadosH=fopen("gfc/Deposit_check.dat","w");
   count=0;
   E_T=0.0;
+  for(l=0;l<=D;l+=1)
+    Pc[l]=0.;
   for(t=t0;t<=tf;t+=dt){
     /*printf("loop - t=%.12f\n",t);*/
     if(count%4==0)
@@ -149,8 +151,7 @@ int main(int argc,char **argv)
       u0sqr=(sph_eq[i].p.u[0])*(sph_eq[i].p.u[0]);
       H += ((sph_eq[i].p.ni)/(sph_eq[i].p.rho))*((sph_eq[i].p.e_p+sph_eq[i].p.p_p)*u0sqr-sph_eq[i].p.p_p);
     }
-    E_T += dt*(H/t);
-    fprintf(dadosH,"%f %f\n",t,H+E_T);
+    fprintf(dadosH,"%f %f\n",t,H+Pc[0]);
     
     if( (count%40)==0 || 
         count == 0 || count == 8 || count == 16 || 
@@ -250,7 +251,7 @@ int main(int argc,char **argv)
     
     /*err=RK4(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,f2_eq,f3_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,f2_neq,f3_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
     /*err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
-    err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);
+    err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi,Pc);
   
     if(err!=0){
       printf("problemas no Integrador - t=%f err=%d\n",t,err);return err;}

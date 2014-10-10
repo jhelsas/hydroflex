@@ -151,8 +151,13 @@ int main(int argc,char **argv)
       u0sqr=(sph_eq[i].p.u[0])*(sph_eq[i].p.u[0]);
       H += ((sph_eq[i].p.ni)/(sph_eq[i].p.rho))*((sph_eq[i].p.e_p+sph_eq[i].p.p_p)*u0sqr-sph_eq[i].p.p_p);
     }
+<<<<<<< HEAD
     fprintf(dadosH,"%f %f\n",t,H+Pc[0]);
     fflush(dadosH);
+=======
+    E_T += dt*H;
+    fprintf(dadosH,"%f %f\n",t,H+E_T);
+>>>>>>> parent of 421c4bc... corrigindo o calculo da energia total
     
     if( (count%40)==0 || 
         count == 0 || count == 8 || count == 16 || 

@@ -151,13 +151,8 @@ int main(int argc,char **argv)
       u0sqr=(sph_eq[i].p.u[0])*(sph_eq[i].p.u[0]);
       H += ((sph_eq[i].p.ni)/(sph_eq[i].p.rho))*((sph_eq[i].p.e_p+sph_eq[i].p.p_p)*u0sqr-sph_eq[i].p.p_p);
     }
-<<<<<<< HEAD
-    fprintf(dadosH,"%f %f\n",t,H+Pc[0]);
-    fflush(dadosH);
-=======
-    E_T += dt*H;
-    fprintf(dadosH,"%f %f\n",t,H+E_T);
->>>>>>> parent of 421c4bc... corrigindo o calculo da energia total
+    fprintf(dadosH,"%f %f %lf\n",t,t*H,H+E_T);
+    E_T += H*(1./t)*dt;
     
     if( (count%40)==0 || 
         count == 0 || count == 8 || count == 16 || 
@@ -257,7 +252,7 @@ int main(int argc,char **argv)
     
     /*err=RK4(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,f2_eq,f3_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,f2_neq,f3_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
     /*err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
-    err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi,Pc);
+    err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);
   
     if(err!=0){
       printf("problemas no Integrador - t=%f err=%d\n",t,err);return err;}

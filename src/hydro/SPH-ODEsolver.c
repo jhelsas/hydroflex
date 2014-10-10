@@ -424,8 +424,7 @@ int HE2(int D,double t,double dt,double h,double kh,
         int Deriv(double ,int ,int ,int ,int *,double ,double ,
               SPHeq_list *,SPHneq_list **,Box *,
               double (*)(double,double),double (*)(double,double),
-              SPHeq_list *,SPHneq_list **),
-        double *Pt
+              SPHeq_list *,SPHneq_list **)
        )
 {
   int i,j,k,l,err,pt0[D+1],pt1[D+1];
@@ -509,7 +508,7 @@ int HE2(int D,double t,double dt,double h,double kh,
   /*
    * 4-momentum Conservation Check
    */
-      
+    /*  
   for(l=0;l<=D;l+=1){
     pt0[l] = 0.; pt1[l] = 0.;
   }
@@ -525,7 +524,7 @@ int HE2(int D,double t,double dt,double h,double kh,
     
   for(l=0;l<=D;l+=1)
     Pt[l] += (1./2.)*( pt0[l]/t + pt1[l]/(t+dt) );
-  
+  */
   return 0;
 }
 

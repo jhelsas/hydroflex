@@ -152,6 +152,7 @@ int main(int argc,char **argv)
       H += ((sph_eq[i].p.ni)/(sph_eq[i].p.rho))*((sph_eq[i].p.e_p+sph_eq[i].p.p_p)*u0sqr-sph_eq[i].p.p_p);
     }
     fprintf(dadosH,"%f %f %lf\n",t,t*H,H+E_T);
+    fflush(dadosH);
     E_T += H*(1./t)*dt;
     
     if( (count%40)==0 || 

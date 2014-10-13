@@ -424,7 +424,8 @@ int HE2(int D,double t,double dt,double h,double kh,
         int Deriv(double ,int ,int ,int ,int *,double ,double ,
               SPHeq_list *,SPHneq_list **,Box *,
               double (*)(double,double),double (*)(double,double),
-              SPHeq_list *,SPHneq_list **)
+              SPHeq_list *,SPHneq_list **),
+        double *Pc
        )
 {
   int i,j,k,l,err,pt0[D+1],pt1[D+1];
@@ -508,23 +509,23 @@ int HE2(int D,double t,double dt,double h,double kh,
   /*
    * 4-momentum Conservation Check
    */
-    /*  
+      
   for(l=0;l<=D;l+=1){
     pt0[l] = 0.; pt1[l] = 0.;
   }
   
   for(i=0;i<N_sph;i+=1){
-    pt0[0] += ((f0_eq[i].p.ni)/(f0_eq[i].p.rho))*((f0_eq[i].p.e_p+f0_eq[i].p.p_p)*(f0_eq[i].p.u[0])*(f0_eq[i].p.u[0])-f0_eq[i].p.p_p);
-    pt1[0] += ((f1_eq[i].p.ni)/(f1_eq[i].p.rho))*((f1_eq[i].p.e_p+f1_eq[i].p.p_p)*(f1_eq[i].p.u[0])*(f1_eq[i].p.u[0])-f1_eq[i].p.p_p);
+    pt0[0] += ((sph_eq[i].p.ni)/(sph_eq[i].p.rho))*((sph_eq[i].p.e_p+sph_eq[i].p.p_p)*(sph_eq[i].p.u[0])*(sph_eq[i].p.u[0])-sph_eq[i].p.p_p);
+    pt1[0] += ((sph_eqTemp[i].p.ni)/(sph_eqTemp[i].p.rho))*((sph_eqTemp[i].p.e_p+sph_eqTemp[i].p.p_p)*(sph_eqTemp[i].p.u[0])*(sph_eqTemp[i].p.u[0])-sph_eqTemp[i].p.p_p);
     for(l=1;l<=D;l+=1){
-      pt0[l] += ((f0_eq[i].p.ni)/(f0_eq[i].p.rho))*(f0_eq[i].p.e_p+f0_eq[i].p.p_p)*(f0_eq[i].p.u[0])*(f0_eq[i].p.u[l]);
-      pt0[l] += ((f1_eq[i].p.ni)/(f1_eq[i].p.rho))*(f1_eq[i].p.e_p+f1_eq[i].p.p_p)*(f1_eq[i].p.u[0])*(f1_eq[i].p.u[l]);
+      pt0[l] += ((sph_eq[i].p.ni)/(sph_eq[i].p.rho))*(sph_eq[i].p.e_p+sph_eq[i].p.p_p)*(sph_eq[i].p.u[0])*(sph_eq[i].p.u[l]);
+      pt1[l] += ((sph_eqTemp[i].p.ni)/(sph_eqTemp[i].p.rho))*(sph_eqTemp[i].p.e_p+sph_eqTemp[i].p.p_p)*(sph_eqTemp[i].p.u[0])*(sph_eqTemp[i].p.u[l]);
     }
   }
     
   for(l=0;l<=D;l+=1)
-    Pt[l] += (1./2.)*( pt0[l]/t + pt1[l]/(t+dt) );
-  */
+    Pc[l] += (1./2.)*( pt0[l]/t + pt1[l]/(t+dt) )*dt;
+  
   return 0;
 }
 

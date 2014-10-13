@@ -20,7 +20,7 @@ int main(int argc,char **argv)
   int *N;
   const int scriptsize=6;
   char **scriptinfo;
-  double t,t0,tf,dt,h,kh,dist,s,ni,S,a,H,E_T,u0sqr;
+  double t,t0,tf,dt,h,kh,dist,s,ni,S,a,H,Hp,E_T,u0sqr;
   double uTF,gammaF,wF,uzF,BF,phi0,sgn;
   double *x,*displ;
   double *Pc,step,graph_size;
@@ -132,10 +132,12 @@ int main(int argc,char **argv)
   E_T=0.0;
   for(l=0;l<=D;l+=1)
     Pc[l]=0.;
+  H=0.;
+  Hp=0.;
   for(t=t0;t<=tf;t+=dt){
     /*printf("loop - t=%.12f\n",t);*/
     if(count%4==0)
-      printf("tau = %.1f\n",t);
+      printf("tau = %.2f\n",t);
   
     err=ssph_2p1bi(D,t,h,kh,N_sph,sph_eq,Nspecies,N,sph_neq,lbox,w_bspline,EoS);
     if(err!=0){
@@ -144,16 +146,18 @@ int main(int argc,char **argv)
       if(err==99)
         break;
     }
-    
-    
+        
     H=0.0;
     for(i=0;i<N_sph;i+=1){
       u0sqr=(sph_eq[i].p.u[0])*(sph_eq[i].p.u[0]);
       H += ((sph_eq[i].p.ni)/(sph_eq[i].p.rho))*((sph_eq[i].p.e_p+sph_eq[i].p.p_p)*u0sqr-sph_eq[i].p.p_p);
     }
-    fprintf(dadosH,"%f %f %lf %lf\n",t,t*H,H+Pc[0],H+E_T);
+    if(count > 1)        
+      fprintf(dadosH,"%lf %lf %lf %lf %lf %lf\n",t,t*H,H+Pc[0],H+E_T,H, (H-Hp)/dt + (Hp/(t-dt)+H/t)/2.);
     fflush(dadosH);
     E_T += H*(1./t)*dt;
+    
+    Hp=H;
     
     if( (count%40)==0 || 
         count == 0 || count == 8 || count == 16 || 
@@ -270,7 +274,7 @@ int main(int argc,char **argv)
   if(checkF!=0)
     fclose(dadosF);
   dadosF=NULL;
-  printf("Fim do Loop Temporal\n");
+  printf("Fim do Loop Tempoaral\n");
   
   
   printf("Inicio das desalocacoes\n");

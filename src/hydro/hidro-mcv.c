@@ -115,6 +115,7 @@ int main(int argc,char **argv)
   printf("Npoints=%d\n",Npoints);
   free(xl); free(xu); free(dx);
   
+  /*
   sprintf(scriptinfo[0],argv[0]);
   sprintf(scriptinfo[1],argv[2]);
   sprintf(scriptinfo[2],"1");
@@ -124,7 +125,8 @@ int main(int argc,char **argv)
   sprintf(scriptinfo[6],argv[3]);
     
   err=scripting(scriptsize+1,scriptinfo,t0,tf,dt);
-       
+  */   
+  
   printf("Inicio do Loop Temporal\n");
   
   dadosH=fopen("gfc/Deposit_check.dat","w");

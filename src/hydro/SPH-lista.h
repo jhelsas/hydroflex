@@ -45,8 +45,8 @@ int fetch_inter_neq(double *x, Box *lbox,double kh,int k,SPHneq_list ***inter_ne
 
 int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
               int Nspecies, int *N, SPHneq_list **sph_neq,
-              Box *lbox,double (*w)(double,double),int (*EoS)(SPHeq_particle*));
+              Box *lbox,double (*w)(int,double,double),int (*EoS)(SPHeq_particle*));
 
 int ssph_2p1bi(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
                int Nspecies, int *N, SPHneq_list **sph_neq,
-               Box *lbox,double (*w)(double,double),int (*EoS)(SPHeq_particle*));
+               Box *lbox,double (*w)(int,double,double),int (*EoS)(SPHeq_particle*));

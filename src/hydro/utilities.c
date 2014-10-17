@@ -527,7 +527,7 @@ int create_Y_line(int D,double **xpo,double *xl,double *xu,
   return 0;
 }
 
-int print_proper_entropy(int D,double h,double kh,Box *lbox,double (*w)(double,double),
+int print_proper_entropy(int D,double h,double kh,Box *lbox,double (*w)(int,double,double),
                          char *filename,int Npoints,double **xp)
 {
   int p,l;
@@ -548,7 +548,7 @@ int print_proper_entropy(int D,double h,double kh,Box *lbox,double (*w)(double,d
         dist+=(x[l]-(inter_eq->p).x[l])*(x[l]-(inter_eq->p).x[l]);
       dist=sqrt(dist);
           
-      s+= ((inter_eq->p).ni)*(((inter_eq->p).S)/((inter_eq->p).u[0]))*w(dist,h);
+      s+= ((inter_eq->p).ni)*(((inter_eq->p).S)/((inter_eq->p).u[0]))*w(D,dist,h);
 
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;
@@ -563,7 +563,7 @@ int print_proper_entropy(int D,double h,double kh,Box *lbox,double (*w)(double,d
 }
 
 int print_proper_energy(int D,int Nspecies,double h,double kh,Box *lbox,
-                        double (*w)(double,double),char *filename,
+                        double (*w)(int,double,double),char *filename,
                         int Npoints,double **xp,double *displ)
 {
   int k,p,l;
@@ -593,8 +593,8 @@ int print_proper_energy(int D,int Nspecies,double h,double kh,Box *lbox,
         dist+=(x[l]-(inter_eq->p).x[l])*(x[l]-(inter_eq->p).x[l]);
       dist=sqrt(dist);
           
-      e_p+= ((inter_eq->p).ni)*(((inter_eq->p).e_p)/((inter_eq->p).rho))*w(dist,h);
-      T += ((inter_eq->p).ni)*(((inter_eq->p).T)/((inter_eq->p).rho))*w(dist,h);
+      e_p+= ((inter_eq->p).ni)*(((inter_eq->p).e_p)/((inter_eq->p).rho))*w(D,dist,h);
+      T += ((inter_eq->p).ni)*(((inter_eq->p).T)/((inter_eq->p).rho))*w(D,dist,h);
 
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;
@@ -610,7 +610,7 @@ int print_proper_energy(int D,int Nspecies,double h,double kh,Box *lbox,
           dist+=(x[l]-(inter_neq[k]->p).x[l])*(x[l]-(inter_neq[k]->p).x[l]);
         dist=sqrt(dist);
       
-        e_p += ((inter_neq[k]->p).ni)*((inter_neq[k]->p).m)*((inter_neq[k]->p).N_p)*w(dist,h);
+        e_p += ((inter_neq[k]->p).ni)*((inter_neq[k]->p).m)*((inter_neq[k]->p).N_p)*w(D,dist,h);
     
         aux_neq=inter_neq[k];
         inter_neq[k]=inter_neq[k]->inext;
@@ -680,7 +680,7 @@ double gubser_proper_energy(double *x,size_t dim, void *par){
 }
 
 int print_new(int D,int Nspecies,double t,double h,double kh,Box *lbox,
-              double (*w)(double,double),char *filename,
+              double (*w)(int,double,double),char *filename,
               int Npoints,double *xp,double *displ,int mode)
 {
   int k,p,l;
@@ -710,9 +710,9 @@ int print_new(int D,int Nspecies,double t,double h,double kh,Box *lbox,
         dist+=(xp[p*(D+1)+l]-(inter_eq->p).x[l])*(xp[p*(D+1)+l]-(inter_eq->p).x[l]);
       dist=sqrt(dist);
                 
-      s += ((inter_eq->p).ni)*((inter_eq->p).S)*w(dist,h);
-      s_p += ((inter_eq->p).ni)*(((inter_eq->p).S)/((inter_eq->p).u[0]))*w(dist,h);
-      e_p += ((inter_eq->p).ni)*(((inter_eq->p).e_p)/((inter_eq->p).rho))*w(dist,h);
+      s += ((inter_eq->p).ni)*((inter_eq->p).S)*w(D,dist,h);
+      s_p += ((inter_eq->p).ni)*(((inter_eq->p).S)/((inter_eq->p).u[0]))*w(D,dist,h);
+      e_p += ((inter_eq->p).ni)*(((inter_eq->p).e_p)/((inter_eq->p).rho))*w(D,dist,h);
       
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;
@@ -734,7 +734,7 @@ int print_new(int D,int Nspecies,double t,double h,double kh,Box *lbox,
 }
 
 int print_4vel_profile(int D,int Nspecies,double h,double kh,Box *lbox,
-                       double (*w)(double,double),char *filename,int Npoints,double **xp)
+                       double (*w)(int,double,double),char *filename,int Npoints,double **xp)
 {
   int k,p,l;
   double x[D+1],u[D+1],dist,rho;
@@ -760,11 +760,11 @@ int print_4vel_profile(int D,int Nspecies,double h,double kh,Box *lbox,
       dist=sqrt(dist);
       /*
       for(l=1;l<=D;l+=1)
-        u[l] += ((inter_eq->p).ni)*(((inter_eq->p).u[l])/((inter_eq->p).rho))*w(dist,h);
+        u[l] += ((inter_eq->p).ni)*(((inter_eq->p).u[l])/((inter_eq->p).rho))*w(D,dist,h);
       */
-      rho+= ((inter_eq->p).ni)*w(dist,h);
+      rho+= ((inter_eq->p).ni)*w(D,dist,h);
       for(l=1;l<=D;l+=1)
-        u[l] += ((inter_eq->p).ni)*((inter_eq->p).u[l])*w(dist,h);
+        u[l] += ((inter_eq->p).ni)*((inter_eq->p).u[l])*w(D,dist,h);
       
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;
@@ -793,11 +793,11 @@ int print_4vel_profile(int D,int Nspecies,double h,double kh,Box *lbox,
         dist=sqrt(dist);
         /*
         for(l=1;l<=D;l+=1)
-          u[l] += ((inter_neq[k]->p).ni)*(((inter_neq[k]->p).u[l])/((inter_neq[k]->p).rho))*w(dist,h);
+          u[l] += ((inter_neq[k]->p).ni)*(((inter_neq[k]->p).u[l])/((inter_neq[k]->p).rho))*w(D,dist,h);
         */
-        rho+=((inter_neq[k]->p).ni)*w(dist,h);
+        rho+=((inter_neq[k]->p).ni)*w(D,dist,h);
         for(l=1;l<=D;l+=1)
-          u[l]+=((inter_neq[k]->p).ni)*((inter_neq[k]->p).u[l])*w(dist,h);
+          u[l]+=((inter_neq[k]->p).ni)*((inter_neq[k]->p).u[l])*w(D,dist,h);
         
         aux_neq=inter_neq[k];
         inter_neq[k]=inter_neq[k]->inext;
@@ -816,7 +816,7 @@ int print_4vel_profile(int D,int Nspecies,double h,double kh,Box *lbox,
 }
 
 int print_charge_density(int D,int Nspecies,double h,double kh,Box *lbox,
-                         double (*w)(double,double),char *filename,
+                         double (*w)(int,double,double),char *filename,
                          int Npoints,double **xp,double *displ)
 {
   int k,p,l;
@@ -841,8 +841,8 @@ int print_charge_density(int D,int Nspecies,double h,double kh,Box *lbox,
         dist+=(x[l]-(inter_eq->p).x[l])*(x[l]-(inter_eq->p).x[l]);
       dist=sqrt(dist);
           
-      nc+= ((inter_eq->p).ni)*((inter_eq->p).Nc)*w(dist,h);
-      ncp+=((inter_eq->p).ni)*(((inter_eq->p).Nc)/((inter_eq->p).u[0]))*w(dist,h);
+      nc+= ((inter_eq->p).ni)*((inter_eq->p).Nc)*w(D,dist,h);
+      ncp+=((inter_eq->p).ni)*(((inter_eq->p).Nc)/((inter_eq->p).u[0]))*w(D,dist,h);
       
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;

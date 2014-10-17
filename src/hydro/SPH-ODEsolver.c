@@ -82,7 +82,7 @@ int neq_force(double t,int D,SPHneq_particle *sph_neqp,double *nu){
 
 int Deriv_MCV(double t,int D,int N_sph,int Nspecies,int *N,double h,double kh,
               SPHeq_list *sph_eq,SPHneq_list **sph_neq,Box *lbox,
-              double (*w)(double,double),double (*Dw)(double,double),
+              double (*w)(int,double,double),double (*Dw)(int,double,double),
               SPHeq_list *f_eq,SPHneq_list **f_neq
              )
 {
@@ -138,7 +138,7 @@ int Deriv_MCV(double t,int D,int N_sph,int Nspecies,int *N,double h,double kh,
           pforce -= (sph_neq[k][i].p.u[l])*((inter_eq->p).u[l]);
         
         pforce = pforce*invtau_R /*+(sph_neq[k][i].p.n_p)*inveta0tau_R2*/;
-        pforce *= (w(dist,h)*(((inter_eq->p).ni)/((inter_eq->p).rho)));
+        pforce *= (w(D,dist,h)*(((inter_eq->p).ni)/((inter_eq->p).rho)));
         dN+=pforce;
         
         aux_eq=inter_eq;
@@ -212,8 +212,8 @@ int Deriv_MCV(double t,int D,int N_sph,int Nspecies,int *N,double h,double kh,
       if(dist > 0){
         pforce=((inter_eq->p).ni)*((sph_eq[i].p.p_p/((sph_eq[i].p.rho)*(sph_eq[i].p.rho)))+((inter_eq->p).p_p/(((inter_eq->p).rho)*((inter_eq->p).rho))));
         for(l=1;l<=D;l+=1){
-          divv += ((inter_eq->p).ni)*(sph_eq[i].p.v[l]-(inter_eq->p).v[l])*(Dw(dist,h)*((sph_eq[i].p.x[l]-(inter_eq->p).x[l])/dist));
-          u[l] -= pforce*(Dw(dist,h))*((sph_eq[i].p.x[l]-(inter_eq->p).x[l])/dist);
+          divv += ((inter_eq->p).ni)*(sph_eq[i].p.v[l]-(inter_eq->p).v[l])*(Dw(D,dist,h)*((sph_eq[i].p.x[l]-(inter_eq->p).x[l])/dist));
+          u[l] -= pforce*(Dw(D,dist,h))*((sph_eq[i].p.x[l]-(inter_eq->p).x[l])/dist);
         }
       }
       
@@ -243,7 +243,7 @@ int Deriv_MCV(double t,int D,int N_sph,int Nspecies,int *N,double h,double kh,
         */
         udotu=pforce;
         pforce = (pforce*invtau_R)*((inter_neq[k]->p).n_p)/* +(((inter_neq[k]->p).n_p)*((inter_neq[k]->p).n_p))*inveta0tau_R2 */;
-        pforce*= (w(dist,h)/((inter_neq[k]->p).rho));
+        pforce*= (w(D,dist,h)/((inter_neq[k]->p).rho));
         
         dS+=pforce*((inter_neq[k]->p).m)*(((inter_neq[k]->p).ni))*udotu;        
         /* GAMBIARRA ALERT */
@@ -321,7 +321,7 @@ int Deriv_MCV(double t,int D,int N_sph,int Nspecies,int *N,double h,double kh,
 
 int Drv_2p1bi(double t,int D,int N_sph,int Nspecies,int *N,double h,double kh,
               SPHeq_list *sph_eq,SPHneq_list **sph_neq,Box *lbox,
-              double (*w)(double,double),double (*Dw)(double,double),
+              double (*w)(int,double,double),double (*Dw)(int,double,double),
               SPHeq_list *f_eq,SPHneq_list **f_neq
              )
 {
@@ -375,8 +375,8 @@ int Drv_2p1bi(double t,int D,int N_sph,int Nspecies,int *N,double h,double kh,
       if(dist > 0){
         pforce=((inter_eq->p).ni)*((sph_eq[i].p.p_p/((sph_eq[i].p.rho)*(sph_eq[i].p.rho)))+((inter_eq->p).p_p/(((inter_eq->p).rho)*((inter_eq->p).rho))));
         for(l=1;l<=D;l+=1){
-          divv += ((inter_eq->p).ni)*(sph_eq[i].p.v[l]-(inter_eq->p).v[l])*(Dw(dist,h)*((sph_eq[i].p.x[l]-(inter_eq->p).x[l])/dist));
-          u[l] -= t*pforce*(Dw(dist,h))*((sph_eq[i].p.x[l]-(inter_eq->p).x[l])/dist);
+          divv += ((inter_eq->p).ni)*(sph_eq[i].p.v[l]-(inter_eq->p).v[l])*(Dw(D,dist,h)*((sph_eq[i].p.x[l]-(inter_eq->p).x[l])/dist));
+          u[l] -= t*pforce*(Dw(D,dist,h))*((sph_eq[i].p.x[l]-(inter_eq->p).x[l])/dist);
         }
       }
       
@@ -416,14 +416,14 @@ int HE2(int D,double t,double dt,double h,double kh,
         SPHneq_list **sph_neq,SPHneq_list **sph_neqTemp,
         SPHneq_list **f0_neq,SPHneq_list **f1_neq,
         Box *lbox,           
-        double (*w)(double,double),double (*Dw)(double,double),
+        double (*w)(int,double,double),double (*Dw)(int,double,double),
         int (*EoS)(SPHeq_particle*),
         int setup(int,double,double,double,int,SPHeq_list *,
                   int, int *, SPHneq_list **, Box *,
-                  double (*)(double,double),int (*)(SPHeq_particle*)),
+                  double (*)(int,double,double),int (*)(SPHeq_particle*)),
         int Deriv(double ,int ,int ,int ,int *,double ,double ,
               SPHeq_list *,SPHneq_list **,Box *,
-              double (*)(double,double),double (*)(double,double),
+              double (*)(int,double,double),double (*)(int,double,double),
               SPHeq_list *,SPHneq_list **),
         double *Pc
        )

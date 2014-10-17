@@ -24,7 +24,7 @@ int main(int argc,char **argv)
   double uTF,gammaF,wF,uzF,BF,phi0,sgn;
   double *x,*displ;
   double *Pc,step,graph_size;
-  double **xp,**xv,**xrp,**xvrp,*xi,*ui,*xl,*xu,*dx,*xP,*xP2;
+  double **xp,**xv,**xrp,**xvrp,*xi,*ui,*xl,*xu,*dx,*xP,*xG,*xP2;
   SPHeq_list *sph_eq,*sph_eqTemp,*f0_eq,*f1_eq,*f2_eq,*f3_eq,*aux_eq,*inter_eq;
   double omega,L,lambda,xt;
   SPHneq_list **sph_neq,**sph_neqTemp,**f0_neq,**f1_neq,**f2_neq,**f3_neq,*aux_neq,**inter_neq;
@@ -108,7 +108,7 @@ int main(int argc,char **argv)
   dx=(double*)malloc((D+1)*sizeof(double));
   for(l=0;l<=D;l+=1){xl[l]=-9.0;dx[l]=0.02;xu[l]=9.0+1.01*dx[l];}
   printf("antes\n");
-  /*err=create_grid(D,&xP,xl,xu,dx,&Npoints);if(err!=0){ return err;}*/
+  err=create_grid(D,&xG,xl,xu,dx,&Npoints);if(err!=0){ return err;}
   err=err=create_X_line(D,&xP,xl,xu,dx,&Npoints);if(err!=0){ return err;};
   err=err=create_Y_line(D,&xP2,xl,xu,dx,&Npoints);if(err!=0){ return err;};
   printf("logo depois\n");
@@ -199,7 +199,7 @@ int main(int argc,char **argv)
           sprintf(filename,"gfc/Xaxis_dens-%s-(t=%.1lf).dat",argv[2],t);
       }
       else
-        sprintf(filename,"gfc/energy-density-(t=%lf).dat",t);
+        sprintf(filename,"gfc/X-edens-(t=%lf).dat",t);
         
       if(print_new(D,Nspecies,t,h,kh,lbox,w.f,filename,Npoints,xP,displ)!=0)
         printf("Erro na impressao da densidade de energia no eixo X\n");
@@ -211,14 +211,27 @@ int main(int argc,char **argv)
           sprintf(filename,"gfc/Yaxis_dens-%s-(t=%.1lf).dat",argv[2],t);
       }
       else
-        sprintf(filename,"gfc/energy-density-(t=%lf).dat",t);
+        sprintf(filename,"gfc/Y-edens-(t=%lf).dat",t);
         
       if(print_new(D,Nspecies,t,h,kh,lbox,w.f,filename,Npoints,xP2,displ)!=0)
-        printf("Erro na impressao da densidade de energia no eixo X\n");
+        printf("Erro na impressao da densidade de energia no eixo Y\n");
+        
+      if(argc>=3){
+        if(argc==4)
+          sprintf(filename,"gfc/%s/edens-%s-(t=%.1lf).dat",argv[3],argv[2],t);
+        else
+          sprintf(filename,"gfc/edens-%s-(t=%.1lf).dat",argv[2],t);
+      }
+      else
+        sprintf(filename,"gfc/grid-edens-(t=%lf).dat",t);
+        
+      if(print_new(D,Nspecies,t,h,kh,lbox,w.f,filename,Npoints,xG,displ)!=0)
+        printf("Erro na impressao da densidade de energia na malha\n");
         
       printf("print out - t=%.12f\n",t);
       
     }
+    
     /*
     if(count==20){
       printf("Fazendo o calculo do freezeout a tempo constante\n");
@@ -258,7 +271,7 @@ int main(int argc,char **argv)
     fprintf(dadosH,"\n");*/
     
     /*err=RK4(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,f2_eq,f3_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,f2_neq,f3_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
-    /*err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
+    /*err=RK2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
     err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi,Pc);
   
     if(err!=0){

@@ -387,7 +387,7 @@ int fetch_inter_neq(double *x, Box *lbox,double kh,int k,SPHneq_list ***inter_ne
  
 int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
               int Nspecies, int *N, SPHneq_list **sph_neq,
-              Box *lbox,double (*w)(double,double),int (*EoS)(SPHeq_particle*))
+              Box *lbox,double (*w)(int,double,double),int (*EoS)(SPHeq_particle*))
 {
   int i,k,l,err;
   double x[D+1],dist,us,p_can,sgn;
@@ -442,7 +442,7 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
         dist+=(x[l]-(inter_eq->p).x[l])*(x[l]-(inter_eq->p).x[l]);
       dist=sqrt(dist);
       
-      sph_eq[i].p.rho += ((inter_eq->p).ni)*w(dist,h);
+      sph_eq[i].p.rho += ((inter_eq->p).ni)*w(D,dist,h);
       
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;
@@ -483,7 +483,7 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
         dist+=(x[l]-(inter_eq->p).x[l])*(x[l]-(inter_eq->p).x[l]);
       dist=sqrt(dist);
       
-      sph_eq[i].p.nb += ((inter_eq->p).ni)*((inter_eq->p).Nc)*w(dist,h);
+      sph_eq[i].p.nb += ((inter_eq->p).ni)*((inter_eq->p).Nc)*w(D,dist,h);
       
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;
@@ -514,7 +514,7 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
           dist+=(x[l]-(inter_neq[k]->p).x[l])*(x[l]-(inter_neq[k]->p).x[l]);
         dist=sqrt(dist);
         
-        sph_neq[k][i].p.rho += ((inter_neq[k]->p).ni)*w(dist,h);
+        sph_neq[k][i].p.rho += ((inter_neq[k]->p).ni)*w(D,dist,h);
         
         aux_neq=inter_neq[k];
         inter_neq[k]=inter_neq[k]->inext;
@@ -536,7 +536,7 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
 
 int ssph_2p1bi(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
                int Nspecies, int *N, SPHneq_list **sph_neq,
-               Box *lbox,double (*w)(double,double),int (*EoS)(SPHeq_particle*))
+               Box *lbox,double (*w)(int,double,double),int (*EoS)(SPHeq_particle*))
 {
   int i,k,l,err;
   double x[D+1],dist,us,p_can,sgn;
@@ -581,8 +581,8 @@ int ssph_2p1bi(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
         dist+=(x[l]-(inter_eq->p).x[l])*(x[l]-(inter_eq->p).x[l]);
       dist=sqrt(dist);
       
-      sph_eq[i].p.rho += ((inter_eq->p).ni)*w(dist,h);
-      /*sph_eq[i].p.s   += ((inter_eq->p).ni)*((inter_eq->p).S)*w(dist,h);*/
+      sph_eq[i].p.rho += ((inter_eq->p).ni)*w(D,dist,h);
+      /*sph_eq[i].p.s   += ((inter_eq->p).ni)*((inter_eq->p).S)*w(D,dist,h);*/
       
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;

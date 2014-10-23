@@ -2,7 +2,7 @@
 
 typedef struct funDDtD
 {
-	double (*f)(double,double);
+	double (*f)(int,double,double);
 } funDDtD;
 
 int sph_eqMalloc(int N_sph,int D,SPHeq_list **sph_eq);
@@ -36,18 +36,18 @@ int create_X_line(int D,double **xpo,double *xl,double *xu,
 int create_Y_line(int D,double **xpo,double *xl,double *xu,
                   double *dx,int *Np);
                   
-int print_proper_entropy(int D,double h,double kh,Box *lbox,double (*w)(double,double),
+int print_proper_entropy(int D,double h,double kh,Box *lbox,double (*w)(int,double,double),
                          char *filename,int Npoints,double **xp);
 
 int print_proper_energy(int D,int Nspecies,double h,double kh,Box *lbox,
-                        double (*w)(double,double),char *filename,int Npoints,double **xp,double *displ);
+                        double (*w)(int,double,double),char *filename,int Npoints,double **xp,double *displ);
                         
 int print_new(int D,int Nspecies,double t,double h,double kh,Box *lbox,
-              double (*w)(double,double),char *filename,
+              double (*w)(int,double,double),char *filename,
               int Npoints,double *xp,double *displ);
               
 int print_4vel_profile(int D,int Nspecies,double h,double kh,Box *lbox,
-                       double (*w)(double,double),char *filename,int Npoints,double **xp);
+                       double (*w)(int,double,double),char *filename,int Npoints,double **xp);
                        
 int scripting(int argc,char **argv,
               double t0,double tf,double dt);

@@ -16,7 +16,7 @@
 
 int main(int argc,char **argv)
 {
-  int count,i,l,p,k,D,N_sph,Nspecies,Nneq,err,Npoints,Nlong,Nvel,Nrp,Nvelrp,Kf,Idf,checkF,gfcf;
+  int count,i,l,p,k,D,N_sph,Nspecies,Nneq,err,Npoints,Nlong,Nvel,Nrp,Nvelrp,Kf,Idf,checkF,gfcf,integrator=0;
   int *N;
   const int scriptsize=6;
   char **scriptinfo;
@@ -270,9 +270,12 @@ int main(int argc,char **argv)
     
     fprintf(dadosH,"\n");*/
     
-    /*err=RK4(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,f2_eq,f3_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,f2_neq,f3_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
-    /*err=RK2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);*/
-    err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi,Pc);
+    if(integrator==0)
+      err=HE2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi,Pc);
+    else if(integrator == 1)
+      err=RK2(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);
+    else
+      err=RK4(D,t,dt,h,kh,N_sph,Nspecies,N,sph_eq,sph_eqTemp,f0_eq,f1_eq,f2_eq,f3_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,f2_neq,f3_neq,lbox,w.f,Dw.f,EoS,ssph_2p1bi,Drv_2p1bi);
   
     if(err!=0){
       printf("problemas no Integrador - t=%f err=%d\n",t,err);return err;}

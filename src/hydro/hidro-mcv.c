@@ -14,6 +14,77 @@
 
 #define EoS EoS_qg
 
+int custom_print(int argc,char **argv,int D,double t,SPHeq_list *sph_eq,
+                 double *displ,int Nspecies, double h, double kh,Box *lbox,
+                 double (*w)(int,double,double),double *XP,double *XP2,
+                 double *xG){
+  int l;
+    
+  if(argc==3)
+    sprintf(filename,"data/eqp-%s-(t=%.1lf).dat",argv[2],t);
+  else if(argc==4)
+    sprintf(filename,"data/%s/eqp-%s-(t=%.1lf).dat",argv[3],argv[2],t);
+  else
+    sprintf(filename,"data/sph_eqparticles-(t=%lf).dat",t);
+  dadosout=fopen(filename,"w");
+  if(dadosout==NULL){
+    printf("Problemas em abrir %s\n",filename);
+    return (-1);
+  }
+  for(i=0;i<N_sph;i+=1){        
+    fprintf(dadosout,"%f %f %f ",sph_eq[i].p.ni,sph_eq[i].p.q,sph_eq[i].p.S);
+    for(l=1;l<=D;l+=1)
+      fprintf(dadosout,"%f ",sph_eq[i].p.x[l]);
+    for(l=1;l<=D;l+=1)
+      fprintf(dadosout,"%f ",sph_eq[i].p.u[l]);
+    fprintf(dadosout,"%lf ",sph_eq[i].p.e_p);
+    fprintf(dadosout,"\n");
+  }
+  fclose(dadosout);
+      
+  for(l=0;l<=D;l+=1)
+    displ[l]=0.0;
+      
+  if(argc>=3){
+    if(argc==4)
+      sprintf(filename,"gfc/%s/Xaxis_dens-%s-(t=%.1lf).dat",argv[3],argv[2],t);
+    else
+      sprintf(filename,"gfc/Xaxis_dens-%s-(t=%.1lf).dat",argv[2],t);
+  }
+  else
+    sprintf(filename,"gfc/X-edens-(t=%lf).dat",t);
+        
+  if(print_new(D,Nspecies,t,h,kh,lbox,w,filename,Npoints,xP,displ)!=0)
+    printf("Erro na impressao da densidade de energia no eixo X\n");
+        
+  if(argc>=3){
+    if(argc==4)
+      sprintf(filename,"gfc/%s/Yaxis_dens-%s-(t=%.1lf).dat",argv[3],argv[2],t);
+    else
+      sprintf(filename,"gfc/Yaxis_dens-%s-(t=%.1lf).dat",argv[2],t);
+  }
+  else
+    sprintf(filename,"gfc/Y-edens-(t=%lf).dat",t);
+        
+  if(print_new(D,Nspecies,t,h,kh,lbox,w,filename,Npoints,xP2,displ)!=0)
+    printf("Erro na impressao da densidade de energia no eixo Y\n");
+        
+  if(argc>=3){
+    if(argc==4)
+      sprintf(filename,"gfc/%s/edens-%s-(t=%.1lf).dat",argv[3],argv[2],t);
+    else
+      sprintf(filename,"gfc/edens-%s-(t=%.1lf).dat",argv[2],t);
+  }
+  else
+    sprintf(filename,"gfc/grid-edens-(t=%lf).dat",t);
+        
+  if(print_new(D,Nspecies,t,h,kh,lbox,w,filename,Npoints,xG,displ)!=0)
+    printf("Erro na impressao da densidade de energia na malha\n");
+  printf("print out - t=%.12f\n",t);
+
+  return 0;
+}
+
 int main(int argc,char **argv)
 {
   int count,i,l,p,k,D,N_sph,Nspecies,Nneq,err,Npoints,Nlong,Nvel,Nrp,Nvelrp,Kf,Idf,checkF,gfcf,integrator=0;
@@ -81,15 +152,6 @@ int main(int argc,char **argv)
   printf("D=%d\nNspecies=%d N_sph=%d\nh=%lf kh=%lf\nt0=%.12lf ,tf=%.12lf ,dt=%.12lf\n",D,Nspecies,N_sph,h,kh,t0,tf,dt);
     
   Pc=(double*)malloc((D+1)*sizeof(double));
-  
-  /*
-  err=adapsize(D,N_sph,Nspecies,N,h,kh,t,&dt,sph_eq,sph_eqTemp,f0_eq,f1_eq,f2_eq,f3_eq,sph_neq,sph_neqTemp,f0_neq,f1_neq,f2_neq,f3_neq,lbox,w.f,Dw.f,EoS_qg,Deriv_MCV);
-  if(err!=0)
-    printf("Erro no adapsize - %d\n",err);
-  printf("Terminada Adaptacao, dt=%lf\n",dt);
-  */
-  
-  printf("oi-1\n");
     
   inter_neq=(SPHneq_list**)malloc(Nspecies*sizeof(SPHneq_list*));
   if(inter_neq==NULL)

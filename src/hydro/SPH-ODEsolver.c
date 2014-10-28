@@ -330,9 +330,9 @@ int Drv_2p1bi(double t,int D,int N_sph,int Nspecies,int *N,double h,double kh,
   SPHeq_list *inter_eq,*aux_eq;
      
   for(i=0;i<N_sph;i+=1){
-     
+     /*
     if(sph_eq[i].p.fo!=0)
-     continue;
+     continue;*/
      
     dS=0.0;
     pforce=0.0;
@@ -433,15 +433,7 @@ int HE2(int D,double t,double dt,double h,double kh,
   err=Deriv(t,D,N_sph,Nspecies,N,h,kh,sph_eq,sph_neq,lbox,w,Dw,f0_eq,f0_neq);
   if(err!=0)
     return 2;
-  
-  /*
-  for(i=0;i<N_sph;i+=1){
-    sph_eq[i].p.sigma=(sph_eq[i].p.rho)*(f0_eq[i].p.S); 
-    for(l=1;l<=D;l+=1)
-      sph_eq[i].p.dudt[l]=f0_eq[i].p.u[l]; 
-  }
-  */
-
+    
   for(i=0;i<N_sph;i+=1){
     for(l=1;l<=D;l+=1){
       sph_eqTemp[i].p.x[l] = sph_eq[i].p.x[l]+(dt)*(f0_eq[i].p.x[l]);
@@ -476,7 +468,7 @@ int HE2(int D,double t,double dt,double h,double kh,
   err=Deriv(t+dt,D,N_sph,Nspecies,N,h,kh,sph_eqTemp,sph_neqTemp,lbox,w,Dw,f1_eq,f1_neq);
   if(err!=0)
     return 4;
-  
+      
   for(i=0;i<N_sph;i+=1){
     
     sph_eq[i].p.Sa = sph_eq[i].p.S; /* freezeout variables*/
@@ -554,13 +546,7 @@ int RK2(int D,double t,double dt,double h,double kh,
   err=Deriv(t,D,N_sph,Nspecies,N,h,kh,sph_eq,sph_neq,lbox,w,Dw,f0_eq,f0_neq);
   if(err!=0)
     return 2;
-  
-  for(i=0;i<N_sph;i+=1){
-    sph_eq[i].p.sigma=(sph_eq[i].p.rho)*(f0_eq[i].p.S); /* freezeout variables */
-    for(l=1;l<=D;l+=1)
-      sph_eq[i].p.dudt[l]=f0_eq[i].p.u[l]; /* freezeout variables */
-  }
-    
+      
   for(i=0;i<N_sph;i+=1){
     for(l=1;l<=D;l+=1){
       sph_eqTemp[i].p.x[l] = sph_eq[i].p.x[l]+(dt/2.0)*(f0_eq[i].p.x[l]);
@@ -658,12 +644,6 @@ int RK4(int D,double t,double dt,double h,double kh,
   if(err!=0)
     return 2;
     
-  for(i=0;i<N_sph;i+=1){
-    sph_eq[i].p.sigma=(sph_eq[i].p.rho)*(f0_eq[i].p.S); /* freezeout variables */
-    for(l=1;l<=D;l+=1)
-      sph_eq[i].p.dudt[l]=f0_eq[i].p.x[l]; /* freezeout variables */
-  } 
-   
   for(i=0;i<N_sph;i+=1){
     for(l=1;l<=D;l+=1){
       sph_eqTemp[i].p.x[l] = sph_eq[i].p.x[l]+(dt/2.0)*(f0_eq[i].p.x[l]);

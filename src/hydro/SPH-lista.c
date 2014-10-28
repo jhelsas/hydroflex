@@ -417,8 +417,9 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
     printf("caixas vazias-%d\n",err);
   
   for(i=0;i<N_sph;i+=1){
+    /*
     if(sph_eq[i].p.fo!=0)
-      continue;    
+      continue;    */
     
     sph_eq[i].p.u[0]=1.0;
     for(l=1;l<=D;l+=1)
@@ -435,6 +436,14 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
       printf("erro no fetch_inter_eq\n");
     sph_eq[i].p.rho=0.0;
     while(inter_eq!=NULL){
+      /*
+      if((inter_eq->p).fo!=0){
+        aux_eq=inter_eq;
+        inter_eq=inter_eq->inext;
+        aux_eq->inext=NULL;
+          
+        continue;
+      }*/
       dist=0.0;
       for(l=1;l<=D;l+=1)
         dist+=(x[l]-(inter_eq->p).x[l])*(x[l]-(inter_eq->p).x[l]);
@@ -446,10 +455,11 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
       inter_eq=inter_eq->inext;
       aux_eq->inext=NULL;
     }
-    
-    sph_eq[i].p.rho_pa = sph_eq[i].p.rho_p; /* Freezout Variable */
-    sph_eq[i].p.Ta = sph_eq[i].p.T; /* Freezout Variable */
-    
+    if(sph_eq[i].p.fo==0){
+      sph_eq[i].p.rho_pa = sph_eq[i].p.rho_p; 
+      sph_eq[i].p.Ta = sph_eq[i].p.T; 
+    }
+        
     sph_eq[i].p.rho_p=(sph_eq[i].p.rho)/(sph_eq[i].p.u[0]);
     sph_eq[i].p.s_p = (sph_eq[i].p.rho_p)*(sph_eq[i].p.S);
     sph_eq[i].p.s = (sph_eq[i].p.s_p)*(sph_eq[i].p.u[0]);
@@ -584,8 +594,15 @@ int ssph_2p1bi(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
       aux_eq->inext=NULL;
     }
     
-    sph_eq[i].p.rho_pa = sph_eq[i].p.rho_p;  /*Freezout Variable */
-    sph_eq[i].p.Ta = sph_eq[i].p.T;         /* Freezout Variable */
+    /* Begin Freezout Memoization */
+    
+    sph_eq[i].p.rho_pa = sph_eq[i].p.rho_p;  
+    sph_eq[i].p.Ta = sph_eq[i].p.T;
+    sph_eq[i].p.spa = sph_eq[i].p.s_p
+    for(l=1;l<=D;l+=1)
+      sph_eq[i].p.  
+    
+    /* End Freezeout Memoization*/
     
     sph_eq[i].p.rho_p=(sph_eq[i].p.rho)/((sph_eq[i].p.u[0])*t); /* scaling com tempo */
     sph_eq[i].p.s_p = (sph_eq[i].p.rho_p)*(sph_eq[i].p.S);

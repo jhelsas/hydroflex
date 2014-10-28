@@ -4,7 +4,7 @@ typedef struct SPHeq_particle
 	double ni,rho,q,S,s,s_p,sigma,Nb,Nc;
 	double rho_p,e_p,p_p,h_p,hsh_p,T,nb,nc;
 	double *x,*u,*v;
-    double Ta,rho_pa,Sa,*xa,*ua,*dudt;
+  double Ta,rho_pa,Sa,*xa,*ua,*dudt;
 } SPHeq_particle;
 
 typedef struct SPHeq_list

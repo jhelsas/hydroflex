@@ -417,10 +417,8 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
     printf("caixas vazias-%d\n",err);
   
   for(i=0;i<N_sph;i+=1){
-    /* 
-     if(sph_eq[i].p.fo!=0)
-       continue;
-     */
+    if(sph_eq[i].p.fo!=0)
+      continue;    
     
     sph_eq[i].p.u[0]=1.0;
     for(l=1;l<=D;l+=1)
@@ -462,10 +460,9 @@ int setup_sph(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
     err=EoS(&(sph_eq[i].p));
     if(err!=0)
       printf("Erro na Eq. de Estado");
-    /*
-      if(sph_eq[i].p.T < T_fo)
-        sph_eq[i].p.fo=1;
-    */
+    
+    if(sph_eq[i].p.T < T_fo)
+      sph_eq[i].p.fo=1;
   }
   
   /*Calculando efeito de carga via carga media*/
@@ -555,11 +552,10 @@ int ssph_2p1bi(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
   err=null_box(lbox); if(err!=1){ printf("caixas vazias-%d\n",err);}
   
   for(i=0;i<N_sph;i+=1){
-    /* 
-     if(sph_eq[i].p.fo!=0)
+     
+    if(sph_eq[i].p.fo!=0)
        continue;
-     */
-    
+        
     sph_eq[i].p.u[0]=1.0;
     for(l=1;l<=D;l+=1)
       sph_eq[i].p.u[0] += (sph_eq[i].p.u[l])*(sph_eq[i].p.u[l]);
@@ -574,7 +570,7 @@ int ssph_2p1bi(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
     if(err!=0)
       printf("erro no fetch_inter_eq\n");
     sph_eq[i].p.rho=0.0;
-    /*sph_eq[i].p.s = 0.0;*/
+    
     while(inter_eq!=NULL){
       dist=0.0;
       for(l=1;l<=D;l+=1)
@@ -582,35 +578,28 @@ int ssph_2p1bi(int D,double t,double h,double kh,int N_sph,SPHeq_list *sph_eq,
       dist=sqrt(dist);
       
       sph_eq[i].p.rho += ((inter_eq->p).ni)*w(D,dist,h);
-      /*sph_eq[i].p.s   += ((inter_eq->p).ni)*((inter_eq->p).S)*w(D,dist,h);*/
       
       aux_eq=inter_eq;
       inter_eq=inter_eq->inext;
       aux_eq->inext=NULL;
     }
     
-    /*sph_eq[i].p.rho_pa = sph_eq[i].p.rho_p;  /*Freezout Variable */
-    /*sph_eq[i].p.Ta = sph_eq[i].p.T;         /* Freezout Variable */
+    sph_eq[i].p.rho_pa = sph_eq[i].p.rho_p;  /*Freezout Variable */
+    sph_eq[i].p.Ta = sph_eq[i].p.T;         /* Freezout Variable */
     
     sph_eq[i].p.rho_p=(sph_eq[i].p.rho)/((sph_eq[i].p.u[0])*t); /* scaling com tempo */
-    /*sph_eq[i].p.s_p = (sph_eq[i].p.s)/((sph_eq[i].p.u[0])*t);*/
     sph_eq[i].p.s_p = (sph_eq[i].p.rho_p)*(sph_eq[i].p.S);
     sph_eq[i].p.s = (sph_eq[i].p.rho)*(sph_eq[i].p.S);
 
     sph_eq[i].p.nc = 0.0;
     sph_eq[i].p.Nc = 0.0;
 
-    /*
-     * sph_eq[i].p.s_p = (sph_eq[i].p.rho_p)*(sph_eq[i].p.S);
-       sph_eq[i].p.s = (sph_eq[i].p.rho)*(sph_eq[i].p.S);  */
-
     err=EoS(&(sph_eq[i].p));
     if(err!=0)
       printf("Erro na Eq. de Estado");
-    /*
-      if(sph_eq[i].p.T < T_fo)
-        sph_eq[i].p.fo=1;
-    */
+    
+    if(sph_eq[i].p.T < T_fo) /*Freezeout check*/
+      sph_eq[i].p.fo=1;
   }
   
   free(inter_neq);

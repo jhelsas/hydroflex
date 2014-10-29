@@ -13,7 +13,7 @@
 #include "utilities.h"
 
 #define EoS EoS_qg
-
+/*
 int custom_print(int argc,char **argv,int D,double t,SPHeq_list *sph_eq,
                  double *displ,int Nspecies, double h, double kh,Box *lbox,
                  double (*w)(int,double,double),double *XP,double *XP2,
@@ -83,7 +83,7 @@ int custom_print(int argc,char **argv,int D,double t,SPHeq_list *sph_eq,
   printf("print out - t=%.12f\n",t);
 
   return 0;
-}
+}*/
 
 int main(int argc,char **argv)
 {

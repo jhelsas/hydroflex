@@ -17,8 +17,6 @@
 #define invtau_R (1.0)
 #define inveta0tau_R2 (0.0)
 
-#define T_fo (0.140)
-
 int EoS_landau(SPHeq_particle *par);
 
 int EoS_qg(SPHeq_particle *par);

@@ -24,7 +24,6 @@ int sph_eqMalloc(int N_sph,int D,SPHeq_list **sph_eq){
     (*sph_eq)[i].p.ni=0.1;
     (*sph_eq)[i].p.S=0.0;
     (*sph_eq)[i].p.x=(double*)malloc((1+D)*sizeof(double));
-    
     if((*sph_eq)[i].p.x==NULL)
       return 3;
     (*sph_eq)[i].p.u=(double*)malloc((1+D)*sizeof(double));
@@ -33,79 +32,32 @@ int sph_eqMalloc(int N_sph,int D,SPHeq_list **sph_eq){
     (*sph_eq)[i].p.v=(double*)malloc((1+D)*sizeof(double));
     if((*sph_eq)[i].p.v==NULL)
       return 5;
-    
     (*sph_eq)[i].p.xa=(double*)malloc((1+D)*sizeof(double));
     if((*sph_eq)[i].p.xa==NULL)
       return 6;
     (*sph_eq)[i].p.ua=(double*)malloc((1+D)*sizeof(double));
     if((*sph_eq)[i].p.ua==NULL)
       return 7;
-    (*sph_eq)[i].p.gradsa=(double*)malloc((1+D)*sizeof(double));
-    if((*sph_eq)[i].p.gradsa==NULL)
+    (*sph_eq)[i].p.dudt=(double*)malloc((1+D)*sizeof(double));
+    if((*sph_eq)[i].p.dudt==NULL)
       return 8;
-    
-    (*sph_eq)[i].p.xb=(double*)malloc((1+D)*sizeof(double));
-    if((*sph_eq)[i].p.xb==NULL)
-      return 6;
-    (*sph_eq)[i].p.ub=(double*)malloc((1+D)*sizeof(double));
-    if((*sph_eq)[i].p.ub==NULL)
-      return 7;
-    (*sph_eq)[i].p.gradsb=(double*)malloc((1+D)*sizeof(double));
-    if((*sph_eq)[i].p.gradsb==NULL)
-      return 8;
-        
-    (*sph_eq)[i].p.xc=(double*)malloc((1+D)*sizeof(double));
-    if((*sph_eq)[i].p.xc==NULL)
-      return 6;
-    (*sph_eq)[i].p.uc=(double*)malloc((1+D)*sizeof(double));
-    if((*sph_eq)[i].p.uc==NULL)
-      return 7;
-    (*sph_eq)[i].p.gradsc=(double*)malloc((1+D)*sizeof(double));
-    if((*sph_eq)[i].p.gradsc==NULL)
-      return 8;
-      
     (*sph_eq)[i].p.fo=0; 
     (*sph_eq)[i].p.x[0]=0.0;
     (*sph_eq)[i].p.u[0]=0.0;
     (*sph_eq)[i].p.v[0]=1.0;
-    
     (*sph_eq)[i].p.xa[0]=0.0;
     (*sph_eq)[i].p.ua[0]=0.0;
-    (*sph_eq)[i].p.gradsa[0]=0.0;
+    (*sph_eq)[i].p.dudt[0]=0.0;
     (*sph_eq)[i].p.Ta=0.0;
-    (*sph_eq)[i].p.sa=0.0;
-    (*sph_eq)[i].p.rhopa=1.0;
-    
-    (*sph_eq)[i].p.xb[0]=0.0;
-    (*sph_eq)[i].p.ub[0]=0.0;
-    (*sph_eq)[i].p.gradsb[0]=0.0;
-    (*sph_eq)[i].p.Tb=0.0;
-    (*sph_eq)[i].p.sb=0.0;
-    (*sph_eq)[i].p.rhopb=1.0;
-    
-    (*sph_eq)[i].p.xc[0]=0.0;
-    (*sph_eq)[i].p.uc[0]=0.0;
-    (*sph_eq)[i].p.gradsc[0]=0.0;
-    (*sph_eq)[i].p.Tc=0.0;
-    (*sph_eq)[i].p.sc=0.0;
-    (*sph_eq)[i].p.rhopc=1.0;
-    
+    (*sph_eq)[i].p.Sa=0.0;
+    (*sph_eq)[i].p.rho_pa=1.0;
     for(l=1;l<=D;l+=1){
       (*sph_eq)[i].p.x[l]=0.0;
       (*sph_eq)[i].p.u[l]=0.0;
       (*sph_eq)[i].p.v[l]=0.0;
-      
       (*sph_eq)[i].p.xa[l]=0.0;
       (*sph_eq)[i].p.ua[l]=0.0;
-      (*sph_eq)[i].p.gradsa[l]=0.0;
-      
-      (*sph_eq)[i].p.xb[l]=0.0;
-      (*sph_eq)[i].p.ub[l]=0.0;
-      (*sph_eq)[i].p.gradsb[l]=0.0;
-      
-      (*sph_eq)[i].p.xb[l]=0.0;
-      (*sph_eq)[i].p.ub[l]=0.0;
-      (*sph_eq)[i].p.gradsb[l]=0.0;
+      (*sph_eq)[i].p.dudt[l]=0.0;
     }
   }
   return 0;

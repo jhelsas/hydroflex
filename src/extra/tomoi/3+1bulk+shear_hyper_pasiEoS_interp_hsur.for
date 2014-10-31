@@ -7,77 +7,66 @@ c
       parameter (ndim=3,npart=10648,imax=100)
       integer ntstep,ndiv,i,j,ioutp,ii
       integer frag(npart),frag2(npart),frag3(npart)
-
       double precision t,ez,esum,esum0
       double precision x(ndim,npart),u(ndim,npart),v(ndim,npart)
       double precision gradP2(ndim,npart)
       double precision s(npart),sigma(npart),entrop(npart),
-     &                 gammaloren(npart),ref(npart),rho(npart)
+                     & gammaloren(npart),ref(npart),rho(npart)
       double precision bulk(npart),theta(npart)
       double precision shear(3,3,npart)
       double precision du(3,3,npart)
       double precision f1(3,npart)
       double precision link(npart),rmin(ndim),rmax(ndim),dr(ndim)
       double precision lead(-3:imax,-3:imax,-3:imax)
-c      double precision lead(-3:imax,-3:imax)
+c     double precision lead(-3:imax,-3:imax)
 
       character*7 outfile(60)
       data outfile/'t01.dat','t02.dat','t03.dat','t04.dat','t05.dat',
-     &             't06.dat','t07.dat','t08.dat','t09.dat','t10.dat',
-     &             't11.dat','t12.dat','t13.dat','t14.dat','t15.dat',
-     &             't16.dat','t17.dat','t18.dat','t19.dat','t20.dat',
-     &             't21.dat','t22.dat','t23.dat','t24.dat','t25.dat',
-     &             't26.dat','t27.dat','t28.dat','t29.dat','t30.dat',
-     &             't31.dat','t32.dat','t33.dat','t34.dat','t35.dat',
-     &             't36.dat','t37.dat','t38.dat','t39.dat','t40.dat',
-     &             't41.dat','t42.dat','t43.dat','t44.dat','t45.dat',
-     &             't46.dat','t47.dat','t48.dat','t49.dat','t50.dat',
-     &             't51.dat','t52.dat','t53.dat','t54.dat','t55.dat',
-     &             't56.dat','t57.dat','t58.dat','t59.dat','t60.dat'/
-	common /steps/ ntstep,ndiv 
+                &  't06.dat','t07.dat','t08.dat','t09.dat','t10.dat',
+                &  't11.dat','t12.dat','t13.dat','t14.dat','t15.dat',
+                &  't16.dat','t17.dat','t18.dat','t19.dat','t20.dat',
+                &  't21.dat','t22.dat','t23.dat','t24.dat','t25.dat',
+                &  't26.dat','t27.dat','t28.dat','t29.dat','t30.dat',
+                &  't31.dat','t32.dat','t33.dat','t34.dat','t35.dat',
+                &  't36.dat','t37.dat','t38.dat','t39.dat','t40.dat',
+                &  't41.dat','t42.dat','t43.dat','t44.dat','t45.dat',
+                &  't46.dat','t47.dat','t48.dat','t49.dat','t50.dat',
+                &  't51.dat','t52.dat','t53.dat','t54.dat','t55.dat',
+                &  't56.dat','t57.dat','t58.dat','t59.dat','t60.dat'/
+      common /steps/ ntstep,ndiv 
 
-
-	call params
-
-	call condini(x,u,s,sigma,bulk,shear,t)
+      call params
+      call condini(x,u,s,sigma,bulk,shear,t)
 
       ez = 0.0d0
       ioutp = 0
       do i=1,npart
-	frag(i) = 0
+        frag(i) = 0
         frag2(i) = 0
         frag3(i) = 0
       end do
-	esum0=0.0d0
-
+      
+      esum0=0.0d0
       ii = 0
-
-
       call hyper0(x,u,s,sigma,entrop,t,rmin,rmax,dr,link,lead,
-     &            frag,frag2,frag3,ii)
-
-      call out(x,u,entrop,sigma,ref,t,
-     &  esum,esum0,ez,bulk,shear,rmin,rmax,dr,link,lead,'t00.dat')
-
-
+                & frag,frag2,frag3,ii)
+      call out(x,u,entrop,sigma,ref,t,esum,esum0,
+             & ez,bulk,shear,rmin,rmax,dr,link,lead,'t00.dat')
+             
       do i=1,ntstep
-      write(6,*) i
-	call step(x,u,s,sigma,ez,bulk,shear,t,gradP2,f1,du,theta)
-
-	call hyper(x,u,s,sigma,entrop,t,rmin,rmax,dr,link,lead
-     &            ,gradP2,f1,du,shear,bulk,theta,frag,frag2,frag3,ii)
-
-      if(mod(i,ndiv).eq.0)then
-	ioutp = ioutp + 1
-	call out(x,u,entrop,sigma,ref,t,
-     &  esum,esum0,ez,bulk,shear,rmin,rmax,dr,link,lead,outfile(ioutp))
-	write(6,*) 't=',t
-      end if
-
+        write(6,*) i
+        call step(x,u,s,sigma,ez,bulk,shear,t,gradP2,f1,du,theta)
+        call hyper(x,u,s,sigma,entrop,t,rmin,rmax,dr,link,lead
+                 & ,gradP2,f1,du,shear,bulk,theta,frag,frag2,frag3,ii)
+        if(mod(i,ndiv).eq.0) then
+          ioutp = ioutp + 1
+          call out(x,u,entrop,sigma,ref,t,esum,esum0,
+                 & ez,bulk,shear,rmin,rmax,dr,link,lead,outfile(ioutp))
+          write(6,*) 't=',t
+        end if
       end do
-
+       
       stop
-
       end
 
 c==========================================
@@ -1110,70 +1099,60 @@ c     summation of the sph particle using the linklist
 c     ===============================================
       implicit none
       integer npart,ndim,i,j,imax,k,ix,iy,iz,kx,ky,kz,ixk,iyk,izk
-	parameter (ndim=3,npart=10648,imax=100)
-	double precision w12,w0,hwt,hwl
-	double precision f(npart),wgt(npart),y(ndim),rmin(ndim),
-     &                 rmax(ndim),dr(ndim),link(npart),dw12(ndim)
-	double precision r(ndim,npart)
+      parameter (ndim=3,npart=10648,imax=100)
+      double precision w12,w0,hwt,hwl
+      double precision f(npart),wgt(npart),y(ndim),rmin(ndim),
+                     & rmax(ndim),dr(ndim),link(npart),dw12(ndim)
+      double precision r(ndim,npart)
       double precision lead(-3:imax,-3:imax,-3:imax)
-c      double precision lead(-3:imax,-3:imax)
-c	double precision lead(-3:imax)
+c     double precision lead(-3:imax,-3:imax)
+c	  double precision lead(-3:imax)
       common /kernel/ hwt,hwl,w0
 
       do i=1,npart
-	f(i) = wgt(i)*w0
-	enddo
+        f(i) = wgt(i)*w0
+      enddo
 
       do i=1,npart
-
-       ix=(r(1,i)-rmin(1))/dr(1)
-       iy=(r(2,i)-rmin(2))/dr(2)
-  	 iz=(r(3,i)-rmin(3))/dr(3)
-
-c     Loops for the boxes adjacent to the central box of i
-c     9 units cubics centered at i
-
-	 do kx=1,5
-	 do ky=1,5
-	 do kz=1,5
-
-	 ixk=ix-3+kx
-	 iyk=iy-3+ky
-	 izk=iz-3+kz
-
-       j=lead(ixk,iyk,izk)
-c       j=lead(ixk,iyk)
-c       j = lead(ixk)
-
-        if(j.ne.0) then
- 2        continue
-        if(i.ne.j) then
-c      Identified one of j's satisfying the distance condition
-           do k=1,3
-	        y(k) = r(k,i)-r(k,j)
-	     enddo
-	  call wkernel(y,w12,dw12)
-	  if(w12.gt.0.d0)then
-	    f(i) = f(i) + wgt(j)*w12
-	  endif
-c      Sum = Sum + f(i,j)  
-        end if
-	         j=link(j)
-               if(j.ne.0) go to 2
-	  end if
-
-       end do
-       end do
-	 end do
-
-	end do
-
-	return
-	end
+        ix=(r(1,i)-rmin(1))/dr(1)
+        iy=(r(2,i)-rmin(2))/dr(2)
+        iz=(r(3,i)-rmin(3))/dr(3)
+          
+        do kx=1,5 ! Loops for the boxes adjacent to the central box of i
+          do ky=1,5 ! 9 units cubics centered at i
+            do kz=1,5
+              ixk=ix-3+kx
+              iyk=iy-3+ky
+              izk=iz-3+kz
+              
+              j=lead(ixk,iyk,izk) ! j=lead(ixk,iyk) j = lead(ixk)
+              if(j.ne.0) then
+2               continue
+                if(i.ne.j) then  ! found one j within distance condition
+                  do k=1,3
+                    y(k) = r(k,i)-r(k,j)
+                  enddo
+                  call wkernel(y,w12,dw12)
+                  
+                  if(w12.gt.0.d0)then
+                    f(i) = f(i) + wgt(j)*w12
+                  endif
+c                 Sum = Sum + f(i,j)  
+                end if
+	            j=link(j)
+                if(j.ne.0) go to 2
+              end if
+            end do
+          end do
+        end do
+      end do
+      
+      return
+      end
 
 c==========================================
       subroutine hyper0(x,u,s,sigma,entrop,t,rmin,rmax,dr,link,lead,
-     &            frag,frag2,frag3,ii)
+                      & frag,frag2,frag3,ii)
 c==========================================
       implicit none
       integer ndim,npart,imax
@@ -1182,31 +1161,29 @@ c==========================================
       integer frag(npart),frag2(npart),frag3(npart)
       integer ix,iy,iz,k,l,kx,ky,kz,ixk,iyk,izk
       double precision x(ndim,npart),u(ndim,npart),entrop(npart),
-     &                 gm(3,3),gmd(3,3),v(ndim,npart)
+                     & gm(3,3),gmd(3,3),v(ndim,npart)
       double precision press(npart),temp(npart),entalp(npart),
-     &                 dwds(npart),gammaloren(npart),sigma(npart),
-     &                 s(npart),rho(npart)
+                     & dwds(npart),gammaloren(npart),sigma(npart),
+                     & s(npart),rho(npart)
       double precision t,hc,Tout,Tcut
       double precision link(npart),rmin(ndim),rmax(ndim),wgt(npart),
-     &                 dr(ndim)
+                     & dr(ndim)
       double precision w12
       double precision ref(npart),y(ndim),dw12(ndim)
       double precision gradP2(ndim,npart)
-      double precision lead(-3:imax,-3:imax,-3:imax)
-c      double precision lead(-3:imax,-3:imax)
+      double precision lead(-3:imax,-3:imax,-3:imax) !
+c     double precision lead(-3:imax,-3:imax)
       double precision dv(ndim,ndim,npart)
       double precision hwt,hwl,w0
       common /kernel/ hwt,hwl,w0
       common /unit/ hc
-c      save frag,frag2,frag3
-c      save ii
-
-
+c     save frag,frag2,frag3
+c     save ii
 
       do i=1,3
-	do j=1,3
-	  gm(i,j) = 0.0d0
-	enddo
+        do j=1,3
+          gm(i,j) = 0.0d0
+        enddo
       enddo
 
       gm(1,1) = -1.0d0
@@ -1214,9 +1191,9 @@ c      save ii
       gm(3,3) = -1.0d0/t**2
 
       do i=1,3
-	do j=1,3
-	  gmd(i,j) = 0.0d0
-	enddo
+        do j=1,3
+          gmd(i,j) = 0.0d0
+        enddo
       enddo
 
       gmd(1,1) = -1.0d0
@@ -1224,69 +1201,65 @@ c      save ii
       gmd(3,3) = -t**2
 
       do i=1,npart
-	  gammaloren(i) = 1.0d0
-	do j=1,ndim
-	  gammaloren(i)=gammaloren(i)-u(j,i)*u(j,i)*gm(j,j)
-	end do
-	  gammaloren(i) = dsqrt(gammaloren(i))
-	do j= 1,ndim
-	  v(j,i) = u(j,i)/gammaloren(i)*gm(j,j)
-	end do
+	    gammaloren(i) = 1.0d0
+        do j=1,ndim
+          gammaloren(i)=gammaloren(i)-u(j,i)*u(j,i)*gm(j,j)
+        end do
+        gammaloren(i) = dsqrt(gammaloren(i))
+        do j= 1,ndim
+          v(j,i) = u(j,i)/gammaloren(i)*gm(j,j)
+        end do
       end do
 
       do i=1,ndim
-	  rmin(i)=1.e10
-	  rmax(i)=-1.e10
+        rmin(i)=1.e10
+        rmax(i)=-1.e10
       end do
 
       do i=1,npart
-	do j=1,ndim
-	  if(rmin(j).gt.x(j,i)) rmin(j)=x(j,i)
-	  if(rmax(j).lt.x(j,i)) rmax(j)=x(j,i)
-	enddo
+        do j=1,ndim
+          if(rmin(j).gt.x(j,i)) rmin(j)=x(j,i)
+          if(rmax(j).lt.x(j,i)) rmax(j)=x(j,i)
+        enddo
       enddo
-
+      
       do i=1,2
-	dr(i) = 2.0d0*hwt
+        dr(i) = 2.0d0*hwt
       enddo
-	dr(3) = 2.0d0*hwl
-
+      dr(3) = 2.0d0*hwl
+      
       call link_3d(x,rmax,rmin,dr,link,lead)
-
+      
       do i= 1,npart
-	wgt(i) = sigma(i)*s(i)
+        wgt(i) = sigma(i)*s(i)
       end do
       call sum(rho,wgt,x,rmin,rmax,dr,link,lead)
-
-*******************************
+      
+c     *******************************
 c      open(unit=88,file='test.dat')
 c      do i=1,npart
 c      write(88,*) i, sigma(i), s(i)
 c      end do
 c      pause
-*******************************
+c     *******************************
 
       do i=1,npart
-      
-      entrop(i) = rho(i)/gammaloren(i)/t
-      call eqstate(entrop(i),press(i),temp(i),entalp(i),dwds(i))
-
-      Tout = 130.0d0/hc
-      if(temp(i).le.Tout)then
-	  if(frag(i).eq.0)then
-          frag(i) = 2
-          frag2(i) = 2
-          ii = ii + 1
-          write(*,*) ii
+        entrop(i) = rho(i)/gammaloren(i)/t
+        call eqstate(entrop(i),press(i),temp(i),entalp(i),dwds(i))
+        Tout = 130.0d0/hc
+        if(temp(i).le.Tout)then
+          if(frag(i).eq.0)then
+            frag(i) = 2
+            frag2(i) = 2
+            ii = ii + 1
+            write(*,*) ii
           else
           end if
-      else
-      end if
-
+        else
+        end if
       end do
-
+      
       return
-
       end
 
 c==========================================
@@ -1300,42 +1273,41 @@ c==========================================
       integer frag(npart),frag2(npart),frag3(npart)
       integer ix,iy,iz,kx,ky,kz,ixk,iyk,izk,ifirst
       double precision x(ndim,npart),u(ndim,npart),entrop(npart),
-     &                 gm(3,3),gmd(3,3),v(ndim,npart)
+                     & gm(3,3),gmd(3,3),v(ndim,npart)
       double precision press(npart),temp(npart),entalp(npart),
-     &                 dwds(npart),gammaloren(npart),sigma(npart),
-     &                 s(npart),rho(npart)
+                     & dwds(npart),gammaloren(npart),sigma(npart),
+                     & s(npart),rho(npart)
       double precision hc,Tout,t,Tcut
       double precision link(npart),rmin(ndim),rmax(ndim),wgt(npart),
-     &                 dr(ndim)
+                     & dr(ndim)
       double precision w12
       double precision ref(npart),y(ndim),dw12(ndim)
       double precision f1(ndim,npart),gradP2(ndim,npart)
       double precision shaa(npart),sphbulk(npart),bulk(npart),
-     &                 theta(npart)
+                     & theta(npart)
       double precision shear(3,3,npart),sphshear(3,3,npart)
-
       double precision lead(-3:imax,-3:imax,-3:imax)
-c      double precision lead(-3:imax,-3:imax)
+c     double precision lead(-3:imax,-3:imax)
       double precision du(3,3,npart)
       double precision hwt,hwl,w0
       double precision tempo(npart),entropo(npart),so(npart),refo(npart)
-     &                ,to(npart),thetao(npart)
+                     & ,to(npart),thetao(npart)
       double precision tempo2(npart),entropo2(npart),so2(npart),
-     &                 refo2(npart),to2(npart),thetao2(npart)
+                     & refo2(npart),to2(npart),thetao2(npart)
       double precision xo(ndim,npart),vo(ndim,npart),
-     &       gradP2o(ndim,npart),f1o(ndim,npart)
+                     & gradP2o(ndim,npart),f1o(ndim,npart)
       double precision xo2(ndim,npart),vo2(ndim,npart),
-     &       gradP2o2(ndim,npart),f1o2(ndim,npart)
+                     & gradP2o2(ndim,npart),f1o2(ndim,npart)
       double precision duo(ndim,ndim,npart)
       double precision duo2(ndim,ndim,npart)
       double precision entropn(npart),sn(npart),refn(npart),tn(npart),
-     &       thetan(npart)
+                     & thetan(npart)
       double precision entropn2(npart),sn2(npart),refn2(npart),
-     &          tn2(npart),thetan2(npart)
+                     & tn2(npart),thetan2(npart)
       double precision xn(ndim,npart),vn(ndim,npart),
-     &       gradP2n(ndim,npart),f1n(ndim,npart)
+                     & gradP2n(ndim,npart),f1n(ndim,npart)
       double precision xn2(ndim,npart),vn2(ndim,npart),
-     &       gradP2n2(ndim,npart),f1n2(ndim,npart)
+                     & gradP2n2(ndim,npart),f1n2(ndim,npart)
       double precision dun(ndim,ndim,npart)
       double precision dun2(ndim,ndim,npart)
       common /kernel/ hwt,hwl,w0
@@ -1344,18 +1316,17 @@ c      double precision lead(-3:imax,-3:imax)
       save ifirst
 
       if(ifirst.eq.0) then
-      open(unit=92,file='hyper_130.dat')
-      open(unit=95,file='cut_100.dat')
-      open(unit=96,file='deiri.dat')
-      ifirst=1
+        open(unit=92,file='hyper_130.dat')
+        open(unit=95,file='cut_100.dat')
+        open(unit=96,file='deiri.dat')
+        ifirst=1
       else
       end if
 
-
       do i=1,3
-	do j=1,3
-	  gm(i,j) = 0.0d0
-	enddo
+        do j=1,3
+          gm(i,j) = 0.0d0
+        enddo
       enddo
 
       gm(1,1) = -1.0d0
@@ -1363,9 +1334,9 @@ c      double precision lead(-3:imax,-3:imax)
       gm(3,3) = -1.0d0/t**2
 
       do i=1,3
-	do j=1,3
-	  gmd(i,j) = 0.0d0
-	enddo
+        do j=1,3
+          gmd(i,j) = 0.0d0
+        enddo
       enddo
 
       gmd(1,1) = -1.0d0
@@ -1373,131 +1344,115 @@ c      double precision lead(-3:imax,-3:imax)
       gmd(3,3) = -t**2
 
       do i=1,npart
-	  gammaloren(i) = 1.0d0
-	do j=1,ndim
-	  gammaloren(i)=gammaloren(i)-u(j,i)*u(j,i)*gm(j,j)
-	end do
-	  gammaloren(i) = dsqrt(gammaloren(i))
-	do j= 1,ndim
-	  v(j,i) = u(j,i)/gammaloren(i)*gm(j,j)
-	end do
+        gammaloren(i) = 1.0d0
+        do j=1,ndim
+          gammaloren(i)=gammaloren(i)-u(j,i)*u(j,i)*gm(j,j)
+        end do
+        gammaloren(i) = dsqrt(gammaloren(i))
+        do j= 1,ndim
+          v(j,i) = u(j,i)/gammaloren(i)*gm(j,j)
+        end do
       end do
-
+      
       do i=1,ndim
-	  rmin(i)=1.e10
-	  rmax(i)=-1.e10
+        rmin(i)=1.e10
+        rmax(i)=-1.e10
       end do
 
       do i=1,npart
-	do j=1,ndim
-	  if(rmin(j).gt.x(j,i)) rmin(j)=x(j,i)
-	  if(rmax(j).lt.x(j,i)) rmax(j)=x(j,i)
-	enddo
+        do j=1,ndim
+          if(rmin(j).gt.x(j,i)) rmin(j)=x(j,i)
+          if(rmax(j).lt.x(j,i)) rmax(j)=x(j,i)
+        enddo
       enddo
 
       do i=1,2
-	dr(i) = 2.0d0*hwt
+        dr(i) = 2.0d0*hwt
       enddo
-	dr(3) = 2.0d0*hwl
+      dr(3) = 2.0d0*hwl
 
       call link_3d(x,rmax,rmin,dr,link,lead)
-c
-c     preparation for the interpolation of hypersurface
-c
-      do i=1,npart
-      if(frag(i).eq.0) then
 
-      tempo(i) = 0.0d0
-      to(i) = t
-      entropo(i) = entrop(i)
-      so(i) = s(i)
-      refo(i) = ref(i)
-      thetao(i) = theta(i)
-
-      do k=1,ndim
-      xo(k,i) = x(k,i)
-      vo(k,i) = v(k,i)
-      gradP2o(k,i) = gradP2(k,i)
-      f1o(k,i) = f1(k,i)
-        do l=1,ndim
-        duo(k,l,i) = du(k,l,i)
-        end do
-      end do
-
-        frag(i)=1
+      do i=1,npart ! preparation for the interpolation of hypersurface
+        if(frag(i).eq.0) then
+          tempo(i) = 0.0d0
+          to(i) = t
+          entropo(i) = entrop(i)
+          so(i) = s(i)
+          refo(i) = ref(i)
+          thetao(i) = theta(i)
+          
+          do k=1,ndim
+            xo(k,i) = x(k,i)
+            vo(k,i) = v(k,i)
+            gradP2o(k,i) = gradP2(k,i)
+            f1o(k,i) = f1(k,i)
+            do l=1,ndim
+              duo(k,l,i) = du(k,l,i)
+            end do
+          end do
+                
+          frag(i)=1
         end if
-
-      if(frag2(i).eq.0) then
-
-      tempo2(i) = 0.0d0
-      to2(i) = t
-      entropo2(i) = entrop(i)
-      so2(i) = s(i)
-      refo2(i) = ref(i)
-      thetao2(i) = theta(i)
-
-      do k=1,ndim
-      xo2(k,i) = x(k,i)
-      vo2(k,i) = v(k,i)
-      gradP2o2(k,i) = gradP2(k,i)
-      f1o2(k,i) = f1(k,i)
-        do l=1,ndim
-        duo2(k,l,i) = du(k,l,i)
-        end do
-      end do
-
-        frag2(i)=1
+          
+        if(frag2(i).eq.0) then
+          tempo2(i) = 0.0d0
+          to2(i) = t
+          entropo2(i) = entrop(i)
+          so2(i) = s(i)
+          refo2(i) = ref(i)
+          thetao2(i) = theta(i)
+          do k=1,ndim
+            xo2(k,i) = x(k,i)
+            vo2(k,i) = v(k,i)
+            gradP2o2(k,i) = gradP2(k,i)
+            f1o2(k,i) = f1(k,i)
+            do l=1,ndim
+              duo2(k,l,i) = du(k,l,i)
+            end do
+          end do
+          
+          frag2(i)=1
         end if
-
       end do
-
 
       do i= 1,npart
-	wgt(i) = sigma(i)*s(i)
+        wgt(i) = sigma(i)*s(i)
       end do
       call sum(rho,wgt,x,rmin,rmax,dr,link,lead)
       
       do l=1,npart
-	wgt(l) = sigma(l)
+        wgt(l) = sigma(l)
       enddo
       call sum(ref,wgt,x,rmin,rmax,dr,link,lead)
-c
-c     freezeout & cut
-c
-      do i=1,npart
-
-      entrop(i) = rho(i)/gammaloren(i)/t
-      call eqstate(entrop(i),press(i),temp(i),entalp(i),dwds(i))
-c
-c     freezeout
-c
-
-      Tout = 130.0d0/hc
-
-      if(frag(i).eq.3.and.temp(i).gt.Tout) then
-      frag(i) = 1
-      write(96,*) i, 'pass1'      
-      else
-      endif
       
-
-      if(frag(i).eq.1)then
-        if(temp(i).le.Tout) then
-      tn(i) = to(i) + (Tout-tempo(i))/(temp(i)-tempo(i))*(t-to(i))
-      entropn(i) = entropo(i) + (Tout-tempo(i))/(temp(i)-tempo(i))
-     &             *(entrop(i)-entropo(i))
-      sn(i) = so(i) + (Tout-tempo(i))/(temp(i)-tempo(i))*(s(i)-so(i))
-      refn(i) = refo(i) + (Tout-tempo(i))/(temp(i)-tempo(i))
-     &   *(ref(i)-refo(i))
-      thetan(i) = thetao(i) + (Tout-tempo(i))/(temp(i)-tempo(i))
-     &   *(theta(i)-thetao(i))
-
-      do k=1,ndim
-      xn(k,i) = xo(k,i) 
-     &    + (Tout-tempo(i))/(temp(i)-tempo(i))*(x(k,i)-xo(k,i))
-      vn(k,i) = vo(k,i) 
-     &    + (Tout-tempo(i))/(temp(i)-tempo(i))*(v(k,i)-vo(k,i))
-      gradP2n(k,i) = gradP2o(k,i) + (Tout-tempo(i))/(temp(i)-tempo(i))
+      do i=1,npart ! freezeout & cut
+        entrop(i) = rho(i)/gammaloren(i)/t
+        call eqstate(entrop(i),press(i),temp(i),entalp(i),dwds(i))
+        Tout = 130.0d0/hc ! freezeout
+        if(frag(i).eq.3.and.temp(i).gt.Tout) then
+          frag(i) = 1
+          write(96,*) i, 'pass1'
+        else
+        endif
+      
+        if(frag(i).eq.1)then
+          if(temp(i).le.Tout) then
+            tn(i) = to(i) + (Tout-tempo(i))/(temp(i)-tempo(i))*(t-to(i))
+            entropn(i) = entropo(i) + (Tout-tempo(i))/(temp(i)-tempo(i))
+                       & *(entrop(i)-entropo(i))
+            sn(i)=so(i) +(Tout-tempo(i))/(temp(i)-tempo(i))*(s(i)-so(i))
+            refn(i) = refo(i) + (Tout-tempo(i))/(temp(i)-tempo(i))
+                   & *(ref(i)-refo(i))
+            thetan(i) = thetao(i) + (Tout-tempo(i))/(temp(i)-tempo(i))
+                     & *(theta(i)-thetao(i))
+            
+            do k=1,ndim
+              xn(k,i) = xo(k,i) 
+                  & +(Tout-tempo(i))/(temp(i)-tempo(i))*(x(k,i)-xo(k,i))
+              vn(k,i) = vo(k,i) 
+                  & +(Tout-tempo(i))/(temp(i)-tempo(i))*(v(k,i)-vo(k,i))
+        gradP2n(k,i) = gradP2o(k,i) + (Tout-tempo(i))/(temp(i)-tempo(i))
      &              *(gradP2(k,i)-gradP2o(k,i))
       f1n(k,i) = f1o(k,i) 
      &    + (Tout-tempo(i))/(temp(i)-tempo(i))*(f1(k,i)-f1o(k,i))

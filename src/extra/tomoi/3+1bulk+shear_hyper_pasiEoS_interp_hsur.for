@@ -85,113 +85,95 @@ c==========================================
 c==========================================
       implicit none
       integer ndim,npart
-	parameter (ndim=3,npart=10648)
-	integer ntstep,nout,ndiv,i,j
-	doubleprecision hwt,hwl,dt,w0,pi,hc,w1,w2
-	double precision covisb,corelb
+      parameter (ndim=3,npart=10648)
+      integer ntstep,nout,ndiv,i,j
+      double precision hwt,hwl,dt,w0,pi,hc,w1,w2
+      double precision covisb,corelb
       common /kernel/ hwt,hwl,w0
-	common /time/ dt
-	common /steps/ ntstep,ndiv 
-	common /unit/ hc
-	common /bulk/ covisb,corelb
+      common /time/ dt
+      common /steps/ ntstep,ndiv 
+      common /unit/ hc
+      common /bulk/ covisb,corelb
 
-	pi = 4.0d0*atan(1.0d0)
+      pi = 4.0d0*atan(1.0d0)
       hc = 197.3d0
-
-	ntstep = 1600
-	dt = 0.2d0
-	hwt = 0.4d0
-	hwl = 0.4d0
-
-
-	nout = 20
+      ntstep = 1600
+      dt = 0.2d0
+      hwt = 0.4d0
+      hwl = 0.4d0
+      nout = 20
       ndiv = ntstep/nout
-
-c     w0 for 2D
-	w2 = 10.d0/7.d0/pi/(hwt**2)
-c     w0 for 1D
-      w1 = 2.0d0/3.0d0/hwl
-
-	w0 = w1*w2
-
-
-
+      w2 = 10.d0/7.d0/pi/(hwt**2) !w0 for 2D
+      w1 = 2.0d0/3.0d0/hwl        !w0 for 1D
+      w0 = w1*w2
       covisb = 0.1d0
-	corelb = 6.0d0
-
-	return
-
-	end
+      corelb = 6.0d0
+      
+      return
+      end
 
 c==========================================
       subroutine condini(x,u,s,sigma,bulk,shear,t)
 c========================================== 
       implicit none
-	integer ndim,npart,imax
-	parameter (ndim=3,npart=10648,imax=100)
-	integer i,j,k
-	double precision x(ndim,npart),u(ndim,npart)
+      integer ndim,npart,imax
+      parameter (ndim=3,npart=10648,imax=100)
+      integer i,j,k
+      double precision x(ndim,npart),u(ndim,npart)
       double precision lead(-3:imax,-3:imax)
-	double precision s(npart),sigma(npart),entrop(npart)
-	double precision bulk(npart)
-	double precision shear(3,3,npart)
-	double precision t
-	double precision table_s(50000),table_e(50000),table_P(50000),
-     &                 table_cs2(50000) 
+      double precision s(npart),sigma(npart),entrop(npart)
+      double precision bulk(npart)
+      double precision shear(3,3,npart)
+      double precision t
+      double precision table_s(50000),table_e(50000),table_P(50000),
+                     & table_cs2(50000) 
       double precision table_T(50000),table_T2(50000)
-	common /table/ table_s,table_e,table_P,
-     &               table_cs2,table_T
+      common /table/ table_s,table_e,table_P,
+                   & table_cs2,table_T
 
-      open(unit=31,file='ini_koide_2.dat')
-
-      do i=1,npart
-	read(31,*) x(1,i), x(2,i), x(3,i), s(i)
-c	read(31,*) x(1,i), x(2,i), x(3,i), sigma(i)
-	end do
+      open(unit=31,file='ini_koide_2.dat') ! Initial condition
 
       do i=1,npart
-	sigma(i) = 1.0d0
-c      s(i) = 1.0d0
-	 do j=1,3
-	u(j,i) = 0.0d0
-	 end do
-	bulk(i) = 0.0d0
-	 do j=1,3
-	   do k=1,3
-	   shear(j,k,i) = 0.0d0
-	   end do
-	 end do
-	end do
+        read(31,*) x(1,i), x(2,i), x(3,i), s(i) ! sigma(i)
+      end do
+      
+      do i=1,npart
+        sigma(i) = 1.0d0 ! s(i)
+        do j=1,3
+          u(j,i) = 0.0d0
+        end do
+        
+        bulk(i) = 0.0d0
+        do j=1,3
+          do k=1,3
+            shear(j,k,i) = 0.0d0
+          end do
+        end do
+      end do
 
       t = 0.6d0
 
-c
-c     eos
-c
-
-      open(unit=35,file='EoS_pasi_uni.dat')
-
-	do i=33001,1,-1
-	read(35,*) table_T(i),table_cs2(i),table_e(i),
-     &           table_P(i),table_s(i)
-	end do
-
-	do i=1,33001
-	table_T(i) = table_T(i)*1000.0d0
-	table_e(i) = table_e(i)*1000.0d0
+      open(unit=35,file='EoS_pasi_uni.dat') ! eos
+      
+      do i=33001,1,-1
+        read(35,*) table_T(i),table_cs2(i),table_e(i),
+                &  table_P(i),table_s(i)
+      end do
+      
+      do i=1,33001
+        table_T(i) = table_T(i)*1000.0d0
+        table_e(i) = table_e(i)*1000.0d0
         table_P(i) = table_P(i)*1000.0d0
-	end do
-
-c      open(unit=51,file='test1.dat')
-
-c	do i= 1,33001
-c	write(51,*) table_T(i),table_cs2(i),table_e(i),
-c     &           table_P(i),table_s(i)
-c	end do
-
-	return
-
-	end
+      end do
+      
+c     open(unit=51,file='test1.dat')
+c     do i= 1,33001
+c	  write(51,*) table_T(i),table_cs2(i),table_e(i),
+c               & table_P(i),table_s(i)
+c	  end do
+      
+      return
+      end
 
 c     ================================================
       subroutine wkernel(xx,wk,dwk)
@@ -200,27 +182,22 @@ c     kernel and its derivative
 c     ================================================      
       implicit none
       integer ndim,k
-	parameter (ndim=3)
-	double precision xx(ndim),dwk(ndim),dwkt(ndim),dwkl(ndim)
+      parameter (ndim=3)
+      double precision xx(ndim),dwk(ndim),dwkt(ndim),dwkl(ndim)
       double precision hwt,hwl,w0,wk,wkt,wkl
       common /kernel/ hwt,hwl,w0
 
+      call wkernel_t(xx,wkt,dwkt)
+      call wkernel_l(xx,wkl,dwkl)
 
-	call wkernel_t(xx,wkt,dwkt)
-	call wkernel_l(xx,wkl,dwkl)
-
-	wk = w0*wkt*wkl
-	
-	do k=1,2
-	dwk(k) = dwkt(k)*wkl*w0 
-	end do 
-
-	dwk(3) = dwkl(3)*wkt*w0
-
+      wk = w0*wkt*wkl
+      do k=1,2
+        dwk(k) = dwkt(k)*wkl*w0 
+      end do 
+      dwk(3) = dwkl(3)*wkt*w0
 
       return
-
-	end
+      end
 
 c     ===============================================================
       subroutine wkernel_t(xx,wk,dwk)
@@ -235,19 +212,17 @@ c     ===============================================================
 
       hwl2 = hwl**2
       hwt2 = hwt**2
-
       do k=1,ndim
        dwk(k) = 0.0d0
       end do
 
 c      r = 0.0d0
-c	do k=1,2
-c      r = r + xx(k)*xx(k)
-c	enddo
-      r = dsqrt(xx(1)*xx(1)+xx(2)*xx(2))
-      
-      q=r/hwt
+c	   do k=1,2
+c        r = r + xx(k)*xx(k)
+c	   enddo
 
+      r = dsqrt(xx(1)*xx(1)+xx(2)*xx(2))
+      q=r/hwt
       if (q.ge.2.d0) then
         wk = 0.d0
         do k=1,2
@@ -291,8 +266,7 @@ c     ================================================================
 
  
       hwl2 = hwl**2
-      hwt2 = hwt**2 
-      
+      hwt2 = hwt**2       
       do k=1,ndim
         dwk(k) = 0.0d0
       end do
@@ -337,40 +311,33 @@ c     output:  P, e, T
       integer i,j
       double precision ds, dT, cs2 ,logs, entalp, dwds, e, p, t, s
       double precision table_s(50000),table_e(50000),table_P(50000),
-     &                 table_cs2(50000),table_T(50000)
+                     & table_cs2(50000),table_T(50000)
       common /table/ table_s,table_e,table_P,
-     &               table_cs2,table_T
+                     & table_cs2,table_T
  
       ds=0.0005d0
 
       logs = dlog(s)
       
       if(logs.ge.table_s(1)) then
-   
-      i = int(( logs - table_s(1) )/ds + 1)    !must be integer
-
-      T = ( table_T(i+1) - table_T(i))/ds*(logs - table_s(i)) 
-     &	+ table_T(i)
-      P = ( table_P(i+1) - table_P(i))/ds*(logs - table_s(i)) 
-     &	+ table_P(i)
-      e = ( table_e(i+1) - table_e(i))/ds*(logs - table_s(i)) 
-     &	+ table_e(i)
-      cs2 = ( table_cs2(i+1) - table_cs2(i))/ds*(logs - table_s(i)) 
-     &	+ table_cs2(i)
-
+        i = int(( logs - table_s(1) )/ds + 1)    !must be integer
+        T = ( table_T(i+1) - table_T(i))/ds*(logs - table_s(i)) 
+          & + table_T(i)
+        P = ( table_P(i+1) - table_P(i))/ds*(logs - table_s(i)) 
+          & + table_P(i)
+        e = ( table_e(i+1) - table_e(i))/ds*(logs - table_s(i)) 
+          & + table_e(i)
+        cs2 = ( table_cs2(i+1) - table_cs2(i))/ds*(logs - table_s(i)) 
+          & + table_cs2(i)
       else
-
-      T = table_T(1)
-      P = table_P(1)
-      e = table_e(1)
-      cs2 = table_cs2(1)
-      
+        T = table_T(1)
+        P = table_P(1)
+        e = table_e(1)
+        cs2 = table_cs2(1)
       endif
 
       dwds = (cs2+1.0d0)*T
-
       entalp = e + P
-
       T=T/197.3d0
       P=P/197.3d0
       e=e/197.3d0
@@ -466,15 +433,13 @@ c     ================================================================
                      & dpi(ndim,npart),vdpi(ndim,npart)
       double precision atrixinv(ndim,ndim,npart),dv(ndim,ndim,npart),
                      & du(ndim,ndim,npart)
-      double precision lead(-3:imax,-3:imax,-3:imax)
-c	double precision lead(-3:imax,-3:imax)
-c      double precision lead(-3:imax)
+      double precision lead(-3:imax,-3:imax,-3:imax)!
+c	  double precision lead(-3:imax,-3:imax)
+c     double precision lead(-3:imax)
       common /kernel/ hwt,hwl,w0
       common /bulk/ covisb,corelb
-c-----------------------------------------------------------
-c     definition of metrix
-c-----------------------------------------------------------
-      do i=1,3
+      
+      do i=1,3 ! definition of metric
         do j=1,3
           gm(i,j) = 0.0d0
         enddo
@@ -494,10 +459,7 @@ c-----------------------------------------------------------
       gmd(2,2) = -1.0d0
       gmd(3,3) = -t**2
 
-c-----------------------------------------------
-!     calculating gamma and velocity
-c-----------------------------------------------
-      do i=1,npart
+      do i=1,npart ! calculating gamma and velocity
         u2=0.0d0
         do k=1,3
           u2 = u2 + u(k,i)*u(k,i)*gm(k,k)
@@ -508,10 +470,8 @@ c-----------------------------------------------
           v(k,i) = u(k,i)/gammaloren(i)*gm(k,k)
         enddo
       enddo
-c-----------------------------------------------
-!     Linklist
-c-----------------------------------------------
-      do k=1,3
+      
+      do k=1,3 ! Linklist
         rmin(k)=1.e10
         rmax(k)=-1.e10
       end do
@@ -635,23 +595,23 @@ c-----------------------------------------------
           end do
         end do
         
-        entrop(i) = rho(i)/gammaloren(i)/t ! Calculating the Thermodynamic Variables
+        ! Calculating the Thermodynamic Variables
+        entrop(i) = rho(i)/gammaloren(i)/t 
         call eqstate (entrop(i),press(i),temp(i),entalp(i),dwds(i))
         call tcoeff(temp(i),zeta(i))
         zeta(i) =zeta(i)*entrop(i)
-c	    relaxtb(i) = corelb*zeta(i)/entalp(i)
-        relaxtb(i) = 9.0d0*zeta(i)/(entalp(i)-4.0d0*press(i))
-        
+
+        ! relaxtb(i) = corelb*zeta(i)/entalp(i) relaxtb(i) = 1.0d0
+        relaxtb(i) = 9.0d0*zeta(i)/(entalp(i)-4.0d0*press(i))   
         eta(i) = 2.0d0*0.08d0*entrop(i)
         relaxts(i) = eta(i)/press(i)/2.0d0
         zeta(i) = 0.0d0
         eta(i) = 0.0d0
-c	    relaxtb(i) = 1.0d0
       enddo
       
 c------------------------------------------------
-c     finished first loop
-c     begginning of second loop
+c     finished first particle loop
+c     begginning of second particle loop
 c     SPH 2 interpolation gradP + gradBulk
 c-----------------------------------------------
       dez = 0.0d0
@@ -741,7 +701,6 @@ c-----------------------------------------------
           end do 
         end do
 
-c       Calculating the force coefficient
         force2(i)=( atrixd1(i) + eta(i)/3.0d0/relaxts(i) )
                 & *( gammaloren(i)*dsigdt(i)/ref(i) - gammaloren(i)/t 
                 & + u(3,i)**2/gammaloren(i)/t**3 )
@@ -749,7 +708,7 @@ c       Calculating the force coefficient
                 & + dwds(i)/temp(i)/t**3
            & *( gammaloren(i)*sphshear(3,3,i) - 2.0d0*u(3,i)*shear0(3,i) 
                 & + u(3,i)**2/gammaloren(i)*shear00(i) )
-        do j=1,3
+        do j=1,3 ! Calculating the force coefficient /\ and \/
           do k=1,3
             force2(i) = force2(i) 
                    & - dwds(i)/temp(i)*( sphshear(j,k,i)*gm(j,j)*gm(k,k) 
@@ -780,7 +739,7 @@ c       Calculating the force coefficient
           fd(k,i) = f(k,i)
         enddo 
         
-        mass(1,1) = gammaloren(i)*omega !Calculating the mass matrix
+        mass(1,1) = gammaloren(i)*omega ! Calculating the mass matrix
                   & + atrixd2(i)*u(1,i)*u(1,i)*gm(1,1) 
                   & + btrixd(1,1,i)
         mass(2,1) = atrixd2(i)*u(2,i)*u(1,i)*gm(1,1) 
@@ -885,117 +844,103 @@ c==========================================
       subroutine step(x,u,s,sigma,ez,bulk,shear,t,gradP2,f1,du,theta)
 c========================================== 
       implicit none
-	integer ndim,npart,imax
-	parameter (ndim=3,npart=10648,imax=100)
-	integer i,j,k,n
-	double precision x(ndim,npart),u(ndim,npart),v(ndim,npart),
-     &                 f(ndim,npart)
-	double precision x1(ndim,npart),u1(ndim,npart),v1(ndim,npart),
-     &                 f1(ndim,npart)
+      integer ndim,npart,imax
+      parameter (ndim=3,npart=10648,imax=100)
+      integer i,j,k,n
+      double precision x(ndim,npart),u(ndim,npart),v(ndim,npart),
+                     & f(ndim,npart)
+      double precision x1(ndim,npart),u1(ndim,npart),v1(ndim,npart),
+                     & f1(ndim,npart)
       double precision gradP2(ndim,npart)
       double precision gammaloren(npart),entrop(npart),sigma(npart),
-     &                 s(npart),ds(npart),rho(npart)
+                     & s(npart),ds(npart),rho(npart)
       double precision s1(npart),ds1(npart)
       double precision theta(npart)
       double precision ez,t,dez,dt
       double precision ez1,dez1,hwt,hwl,w0
-	double precision link(npart),rmin(ndim),rmax(ndim),wgt(npart),
-     &                 dr(ndim)
-      double precision lead(-3:imax,-3:imax,-3:imax)	
-c      double precision lead(-3:imax,-3:imax)
-	double precision bulk(npart),bulk1(npart),
-     &                 dbulk(npart),dbulk1(npart)
-	double precision shear(3,3,npart),shear1(3,3,npart),
-     &                 dshear(3,3,npart),dshear1(3,3,npart)
+      double precision link(npart),rmin(ndim),rmax(ndim),wgt(npart),
+                     & dr(ndim)
+      double precision lead(-3:imax,-3:imax,-3:imax)
+                     ! lead(-3:imax,-3:imax)
+      double precision bulk(npart),bulk1(npart),
+                     & dbulk(npart),dbulk1(npart)
+      double precision shear(3,3,npart),shear1(3,3,npart),
+                     & dshear(3,3,npart),dshear1(3,3,npart)
       double precision du(3,3,npart)
-
       common /time/ dt
       common /kernel/ hwt,hwl,w0
 
-
       call derives(x,u,s,sigma,ez,bulk,shear,v,f,ds,dez,dbulk,dshear,t
-     &             ,gradP2,du,theta)
+                 & ,gradP2,du,theta)
 
       do i=1,npart
-	  do j=1,3
-            x1(j,i) = x(j,i) + 0.5d0*dt*v(j,i)
-	    u1(j,i) = u(j,i) + 0.5d0*dt*f(j,i)
+        do j=1,3
+          x1(j,i) = x(j,i) + 0.5d0*dt*v(j,i)
+          u1(j,i) = u(j,i) + 0.5d0*dt*f(j,i)
+        end do
+        
+        do j=1,3
+          do k=1,3
+            shear1(k,j,i) = shear(k,j,i) + 0.5d0*dt*dshear(k,j,i)
           end do
-
-
-	  do j=1,3
-	    do k=1,3
-	    shear1(k,j,i) = shear(k,j,i) + 0.5d0*dt*dshear(k,j,i)
-	    end do
-	  end do
-c	  do j=1,3
-c	    shear1(1,j,i) = shear(1,j,i) + 0.5d0*dt*dshear(1,j,i)
-c	  end do
-c	  do j=2,3
-c	    shear1(2,j,i) = shear(2,j,i) + 0.5d0*dt*dshear(2,j,i)	  
-c	  end do
-c          shear1(3,3,i) = shear(3,3,i) + 0.5d0*dt*dshear(3,3,i)
-
+        end do
+        
+c       do j=1,3
+c	      shear1(1,j,i) = shear(1,j,i) + 0.5d0*dt*dshear(1,j,i)
+c	    end do
+c	    do j=2,3
+c	      shear1(2,j,i) = shear(2,j,i) + 0.5d0*dt*dshear(2,j,i)	  
+c	    end do
+c       shear1(3,3,i) = shear(3,3,i) + 0.5d0*dt*dshear(3,3,i)
+      
 c	    shear1(2,1,i) = shear1(1,2,i)
-c	  do j=1,2
-c		shear1(3,j,i) = shear1(j,3,1)
-c	  end do
-	    
-
-
-	  s1(i) = s(i) + 0.5d0*dt*ds(i)
-	  bulk1(i) = bulk(i) + 0.5d0*dt*dbulk(i)
-	end do
-
-	ez1 = ez + 0.5d0*dt*dez
-
-	t = t + 0.5d0*dt
-
-
-      call derives(x1,u1,s1,sigma,ez1,bulk1,shear1,v1,f1,ds1,dez1,
-     &             dbulk1,dshear1,t,gradP2,du,theta)
-
-	do i=1,npart
-	  do j=1,ndim
-            x(j,i) = x(j,i) + dt*v1(j,i)
-	    u(j,i) = u(j,i) + dt*f1(j,i)
-	  end do
-
-
-	  do j=1,3
-	    do k=1,3
-	    shear(k,j,i) = shear(k,j,i) + dt*dshear1(k,j,i)
-	    end do
-	  end do
-
-c	  do j=1,3
-c	    shear(1,j,i) = shear(1,j,i) + dt*dshear1(1,j,i)
-c	  end do
-c	  do j=2,3
-c	    shear(2,j,i) = shear(2,j,i) + dt*dshear1(2,j,i)	  
-c	  end do
-c          shear(3,3,i) = shear(3,3,i) + dt*dshear1(3,3,i)
-
-c	    shear(2,1,i) = shear(1,2,i)
-c	  do j=1,2
-c		shear(3,j,i) = shear(j,3,1)
-c	  end do
-
-	  s(i) = s(i) + dt*ds1(i)
-	  bulk(i) = bulk(i) + dt*dbulk1(i)
-	end do
-
-	ez = ez + dt*dez1
-
+c	    do j=1,2
+c         shear1(3,j,i) = shear1(j,3,1)
+c	    end do
+        s1(i) = s(i) + 0.5d0*dt*ds(i)
+        bulk1(i) = bulk(i) + 0.5d0*dt*dbulk(i)
+      end do
+      
+      ez1 = ez + 0.5d0*dt*dez
       t = t + 0.5d0*dt
-
+      
+      call derives(x1,u1,s1,sigma,ez1,bulk1,shear1,v1,f1,ds1,dez1,
+                 & dbulk1,dshear1,t,gradP2,du,theta)
+      
+      do i=1,npart
+        do j=1,ndim
+          x(j,i) = x(j,i) + dt*v1(j,i)
+	      u(j,i) = u(j,i) + dt*f1(j,i)
+        end do
+        
+        do j=1,3
+	      do k=1,3
+	        shear(k,j,i) = shear(k,j,i) + dt*dshear1(k,j,i)
+          end do
+        end do
+c       do j=1,3
+c         shear(1,j,i) = shear(1,j,i) + dt*dshear1(1,j,i)
+c	    end do
+c       do j=2,3
+c         shear(2,j,i) = shear(2,j,i) + dt*dshear1(2,j,i)	  
+c       end do
+c       shear(3,3,i) = shear(3,3,i) + dt*dshear1(3,3,i)
+c	    shear(2,1,i) = shear(1,2,i)
+c	    do j=1,2
+c         shear(3,j,i) = shear(j,3,1)
+c       end do
+        s(i) = s(i) + dt*ds1(i)
+        bulk(i) = bulk(i) + dt*dbulk1(i)
+      end do
+      
+      ez = ez + dt*dez1
+      t = t + 0.5d0*dt
       return
-
-	end
+      end
 
 c     ================================================
-
-	subroutine link_3d(r,rmax,rmin,dr,link,lead)
+ 
+      subroutine link_3d(r,rmax,rmin,dr,link,lead)
 
 c     This routine generates just generates the table for linklist,
 c     that is,  lead(ix,iy,iz) and link(i)
@@ -1007,8 +952,7 @@ c     dr is a vector which defines the range of the binary force.
 c     For a given particle i, those particles j which satisfy 
 c                          |r(i,k)-r(j,k)| < dr(k) 
 c     are considered in the sum of the forces.  
-
-
+c     
 c     Caution:
 c     
 c                |rmax(k)-rmin(k)|/dx(k) < imax
@@ -1022,54 +966,52 @@ c
 c     should be copied in the program which
 c     uses these lists, together with the parameter, imax and n values. 
 c 
+
       implicit none 
-	integer npart,ndim,imax,ix,iy,iz,i,kx,ky,kz,ixk,iyk,izk
-	parameter(ndim=3,npart=10648,imax=100)
-	double precision rmin(ndim),rmax(ndim),dr(ndim),link(npart)
+      integer npart,ndim,imax,ix,iy,iz,i,kx,ky,kz,ixk,iyk,izk
+      parameter(ndim=3,npart=10648,imax=100)
+      double precision rmin(ndim),rmax(ndim),dr(ndim),link(npart)
       double precision r(ndim,npart)
-	double precision lead(-3:imax,-3:imax,-3:imax)
-c	double precision lead(-3:imax,-3:imax)
-c      double precision lead(-3:imax)
-
- 
-	 do i=1,npart
-       ix=(r(1,i)-rmin(1))/dr(1)
-       iy=(r(2,i)-rmin(2))/dr(2)
-	 iz=(r(3,i)-rmin(3))/dr(3)
-
-	 do kx=1,5
-	 do ky=1,5
-	 do kz=1,5
-
-	 ixk=ix-3+kx
-	 iyk=iy-3+ky
-	 izk=iz-3+kz
-
-       lead(ixk,iyk,izk)=0
-c       lead(ixk,iyk)=0
-c       lead(ixk)=0
-
-       end do
-	 end do
-       end do
-
-	 end do
+      double precision lead(-3:imax,-3:imax,-3:imax)
+c     double precision lead(-3:imax,-3:imax)
+c     double precision lead(-3:imax)
+      
+      do i=1,npart
+        ix=(r(1,i)-rmin(1))/dr(1)
+        iy=(r(2,i)-rmin(2))/dr(2)
+        iz=(r(3,i)-rmin(3))/dr(3)
+        
+        do kx=1,5
+          do ky=1,5
+            do kz=1,5
+              ixk=ix-3+kx
+              iyk=iy-3+ky
+              izk=iz-3+kz
+              
+              lead(ixk,iyk,izk)=0
+c             lead(ixk,iyk)=0
+c             lead(ixk)=0
+            end do
+          end do
+        end do
+      end do
 
       do i=1,npart
-      ix=(r(1,i)-rmin(1))/dr(1)
-      iy=(r(2,i)-rmin(2))/dr(2)
-	iz=(r(3,i)-rmin(3))/dr(3)
+        ix=(r(1,i)-rmin(1))/dr(1)
+        iy=(r(2,i)-rmin(2))/dr(2)
+        iz=(r(3,i)-rmin(3))/dr(3)
+	    
+        link(i)=lead(ix,iy,iz)
+        lead(ix,iy,iz)=i
 
-	link(i)=lead(ix,iy,iz)
-	lead(ix,iy,iz)=i
-c	link(i)=lead(ix,iy)
-c	lead(ix,iy)=i
-c      link(i)=lead(ix)
-c	lead(ix)=i
-	end do
-
-	return
-	end
+c	    link(i)=lead(ix,iy)
+c	    lead(ix,iy)=i
+c       link(i)=lead(ix)
+c	    lead(ix)=i
+      end do
+      
+      return
+      end
 
 C     =====================================================================
 C 
@@ -1077,151 +1019,90 @@ C
 C
 C     =====================================================================
  
-       INTEGER m,mp,n,np,NMAX  
- 
-       double precision a(np,np),b(np,mp)  
- 
-       PARAMETER (NMAX=50)  
- 
-       INTEGER i,icol,irow,j,k,l,ll,indxc(NMAX),indxr(NMAX),ipiv(NMAX)  
- 
-       double precision big,dum,pivinv  
- 
-       do 11 j=1,n  
- 
-         ipiv(j)=0  
- 
- 11    continue  
- 
-       do 22 i=1,n  
- 
-         big=0.  
- 
-         do 13 j=1,n  
- 
-           if(ipiv(j).ne.1)then  
- 
-             do 12 k=1,n  
- 
-               if (ipiv(k).eq.0) then  
- 
-                 if (abs(a(j,k)).ge.big)then  
- 
-                   big=abs(a(j,k))  
- 
-                   irow=j  
- 
-                   icol=k  
- 
-                 endif  
- 
-               else if (ipiv(k).gt.1) then  
- 
-                 pause 'singular matrix in gaussj'  
- 
-               endif  
- 
- 12          continue  
- 
-           endif  
- 
- 13      continue  
- 
-         ipiv(icol)=ipiv(icol)+1  
- 
-         if (irow.ne.icol) then  
- 
-           do 14 l=1,n  
- 
-             dum=a(irow,l)  
- 
-             a(irow,l)=a(icol,l)  
- 
-             a(icol,l)=dum  
- 
- 14        continue  
- 
-           do 15 l=1,m  
- 
-             dum=b(irow,l)  
- 
-             b(irow,l)=b(icol,l)  
- 
-             b(icol,l)=dum  
- 
- 15        continue  
- 
-         endif  
- 
-         indxr(i)=irow  
- 
-         indxc(i)=icol  
- 
-         if (a(icol,icol).eq.0.) pause 'singular matrix in gaussj'  
- 
-         pivinv=1./a(icol,icol)  
- 
-         a(icol,icol)=1.  
- 
-         do 16 l=1,n  
- 
-           a(icol,l)=a(icol,l)*pivinv  
- 
- 16      continue  
- 
-         do 17 l=1,m  
- 
-           b(icol,l)=b(icol,l)*pivinv  
- 
- 17      continue  
- 
-         do 21 ll=1,n  
- 
-           if(ll.ne.icol)then  
- 
-             dum=a(ll,icol)  
- 
-             a(ll,icol)=0.  
- 
-             do 18 l=1,n  
- 
-               a(ll,l)=a(ll,l)-a(icol,l)*dum  
- 
- 18          continue  
- 
-             do 19 l=1,m  
- 
-               b(ll,l)=b(ll,l)-b(icol,l)*dum  
- 
- 19          continue  
- 
-           endif  
- 
- 21      continue  
- 
- 22    continue  
- 
-       do 24 l=n,1,-1  
- 
-         if(indxr(l).ne.indxc(l))then  
- 
-           do 23 k=1,n  
- 
-             dum=a(k,indxr(l))  
- 
-             a(k,indxr(l))=a(k,indxc(l))  
- 
-             a(k,indxc(l))=dum  
- 
- 23        continue  
- 
-         endif  
- 
- 24    continue  
- 
-       return  
- 
-       END  
+      INTEGER m,mp,n,np,NMAX
+      double precision a(np,np),b(np,mp)
+      PARAMETER (NMAX=50)
+      INTEGER i,icol,irow,j,k,l,ll,indxc(NMAX),indxr(NMAX),ipiv(NMAX) 
+      double precision big,dum,pivinv  
+ 
+      do 11 j=1,n
+         ipiv(j)=0   
+11    continue  
+       
+      do 22 i=1,n
+        big=0.  
+        do 13 j=1,n 
+          if(ipiv(j).ne.1)then 
+            do 12 k=1,n 
+              if (ipiv(k).eq.0) then 
+                if (abs(a(j,k)).ge.big)then 
+                  big=abs(a(j,k)) 
+                  irow=j 
+                  icol=k 
+                endif  
+                   
+                else if (ipiv(k).gt.1) then 
+                  pause 'singular matrix in gaussj'
+                endif  
+12          continue
+          endif  
+13      continue  
+         
+        ipiv(icol)=ipiv(icol)+1
+        if (irow.ne.icol) then
+          do 14 l=1,n
+            dum=a(irow,l)  
+            a(irow,l)=a(icol,l)
+            a(icol,l)=dum 
+14        continue  
+          do 15 l=1,m  
+            dum=b(irow,l)
+            b(irow,l)=b(icol,l) 
+            b(icol,l)=dum
+15        continue  
+        endif  
+        indxr(i)=irow   
+        indxc(i)=icol  
+        
+        if (a(icol,icol).eq.0.) pause 'singular matrix in gaussj'  
+        
+        pivinv=1./a(icol,icol)
+        a(icol,icol)=1.
+        
+        do 16 l=1,n
+          a(icol,l)=a(icol,l)*pivinv
+16      continue 
+        
+        do 17 l=1,m 
+          b(icol,l)=b(icol,l)*pivinv 
+17      continue
+
+        do 21 ll=1,n
+          if(ll.ne.icol)then
+            dum=a(ll,icol)
+            a(ll,icol)=0.
+            do 18 l=1,n 
+              a(ll,l)=a(ll,l)-a(icol,l)*dum 
+18          continue 
+            do 19 l=1,m 
+              b(ll,l)=b(ll,l)-b(icol,l)*dum  
+19          continue 
+          endif
+21      continue
+22    continue 
+
+      do 24 l=n,1,-1 
+        if(indxr(l).ne.indxc(l)) then 
+          do 23 k=1,n 
+            dum=a(k,indxr(l)) 
+            a(k,indxr(l))=a(k,indxc(l)) 
+            a(k,indxc(l))=dum 
+23        continue 
+        endif
+24    continue 
+      
+      return 
+      END  
 
 c     ===============================================
       subroutine sum(f,wgt,r,rmin,rmax,dr,link,lead)

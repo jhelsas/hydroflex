@@ -9,16 +9,16 @@ c
       double precision press,entalp,dwds,c2,dp0,nor,dndp
       double precision hw,w0,hc
       double precision entrop(npart),y(ndim),shear00(npart),un0(npart),
-     &                 sphbulk(npart),theta(npart),t(npart)
+                     & sphbulk(npart),theta(npart),t(npart)
       double precision r(ndim,npart),v(ndim,npart),gradP(ndim,npart),
-     &                 f1(ndim,npart),gm(3,3),gmd(3,3),
-     &                 shear0(ndim,npart),ans(800,800)
+                     & f1(ndim,npart),gm(3,3),gmd(3,3),
+                     & shear0(ndim,npart),ans(800,800)
       double precision sphshear(3,3,npart),du(ndim,ndim,npart)
       double precision un(ndim,npart)
       double precision pmax,dp,px,py,u0,u1,u2,np,nu,ne,f,e,xm,pi,
-     &                 dtheta,thet,p
+                     & dtheta,thet,p
       double precision sigma(npart),s(npart),ref(npart),
-     &                 gammaloren(npart),temp(npart)
+                     & gammaloren(npart),temp(npart)
       common /kernel/ hw,w0
       common /unit/ hc
       common /num/ pi
@@ -48,11 +48,11 @@ c
       
       do i=1,npart
         read(unit=11,fmt=10)  t(i),r(1,i),r(2,i),v(1,i),v(2,i),
-       &                entrop(i),gradP(1,i),gradP(2,i),
-       &                du(1,1,i),du(1,2,i),du(2,1,i),du(2,2,i),
-       &                f1(1,i),f1(2,i),theta(i),
-       &                sphshear(1,1,i),sphshear(1,2,i),sphshear(2,1,i),
-       &                sphshear(2,2,i),sphbulk(i),sigma(i),s(i),ref(i)
+                            & entrop(i),gradP(1,i),gradP(2,i),
+                            & du(1,1,i),du(1,2,i),du(2,1,i),du(2,2,i),
+                            & f1(1,i),f1(2,i),theta(i),
+                      & sphshear(1,1,i),sphshear(1,2,i),sphshear(2,1,i),
+                       & sphshear(2,2,i),sphbulk(i),sigma(i),s(i),ref(i)
         do k=1,3
 	        do l=1,3
             gm(k,l) = 0.0d0
@@ -233,7 +233,7 @@ c
 
      	do i=33001,1,-1
 	      read(35,*) table_T(i),table_cs2(i),table_e(i),
-     &             table_P(i),table_s(i)
+                 & table_P(i),table_s(i)
       end do
 
       do i=1,33001
@@ -270,13 +270,13 @@ c     output:  P, e, T
 
 
       T = ( table_T(i+1) - table_T(i))/ds*(logs - table_s(i)) 
-     &	+ table_T(i)
+        & +table_T(i)
       P = ( table_P(i+1) - table_P(i))/ds*(logs - table_s(i)) 
-     &	+ table_P(i)
+        & +table_P(i)
       e = ( table_e(i+1) - table_e(i))/ds*(logs - table_s(i)) 
-     &	+ table_e(i)
+        & + table_e(i)
       cs2 = ( table_cs2(i+1) - table_cs2(i))/ds*(logs - table_s(i)) 
-     &	+ table_cs2(i)
+        & + table_cs2(i)
 
       dwds = (cs2+1.0d0)*T
       entalp = e + P

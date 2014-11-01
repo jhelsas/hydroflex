@@ -157,9 +157,9 @@ c==========================================
       
 c     open(unit=51,file='test1.dat')
 c     do i= 1,33001
-c	  write(51,*) table_T(i),table_cs2(i),table_e(i),
+c	    write(51,*) table_T(i),table_cs2(i),table_e(i),
 c               & table_P(i),table_s(i)
-c	  end do
+c	    end do
       
       return
       end

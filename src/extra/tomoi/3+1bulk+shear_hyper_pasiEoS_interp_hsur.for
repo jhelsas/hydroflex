@@ -1,7 +1,7 @@
-c
-c
-c
-c
+c     Relativistic Hydrodynamics SPH Program from Tomoi Koide
+c     tau/eta coordinates, freezeout and simplified shear+bulk viscosity
+c     freezeout uses quadratric interpolation
+c     Equation of state is a lattice based, input file EoS
       implicit none
       integer ndim,npart,imax
       parameter (ndim=3,npart=10648,imax=100)
@@ -1427,6 +1427,7 @@ c     double precision lead(-3:imax,-3:imax)
       call sum(ref,wgt,x,rmin,rmax,dr,link,lead)
       
       do i=1,npart ! freezeout & cut
+        
         entrop(i) = rho(i)/gammaloren(i)/t
         call eqstate(entrop(i),press(i),temp(i),entalp(i),dwds(i))
         Tout = 130.0d0/hc ! freezeout
@@ -1435,7 +1436,7 @@ c     double precision lead(-3:imax,-3:imax)
           write(96,*) i, 'pass1'
         else
         endif
-      
+        
         if(frag(i).eq.1)then
           if(temp(i).le.Tout) then
             tn(i) = to(i) + (Tout-tempo(i))/(temp(i)-tempo(i))*(t-to(i))
@@ -1452,156 +1453,138 @@ c     double precision lead(-3:imax,-3:imax)
                   & +(Tout-tempo(i))/(temp(i)-tempo(i))*(x(k,i)-xo(k,i))
               vn(k,i) = vo(k,i) 
                   & +(Tout-tempo(i))/(temp(i)-tempo(i))*(v(k,i)-vo(k,i))
-        gradP2n(k,i) = gradP2o(k,i) + (Tout-tempo(i))/(temp(i)-tempo(i))
-     &              *(gradP2(k,i)-gradP2o(k,i))
-      f1n(k,i) = f1o(k,i) 
-     &    + (Tout-tempo(i))/(temp(i)-tempo(i))*(f1(k,i)-f1o(k,i))
-        do l=1,ndim
-          dun(k,l,i) = duo(k,l,i) 
-     &    + (Tout-tempo(i))/(temp(i)-tempo(i))*(du(k,l,i)-duo(k,l,i))
-        end do
-      end do
-        
-      frag(i) = 3
-
-
-      else
-
-      tempo(i) = temp(i)
-      to(i) = t
-      entropo(i) = entrop(i)
-      so(i) = s(i)
-      refo(i) = ref(i)
-      thetao(i) = theta(i)
-
-      do k=1,ndim
-        xo(k,i) = x(k,i)
-        vo(k,i) = v(k,i)
-        gradP2o(k,i) = gradP2(k,i)
-        f1o(k,i) = f1(k,i)
-          do l=1,ndim
-            duo(k,l,i) = du(k,l,i)
-          end do
-      end do
-        
-        endif
-
-      else
-      end if
-c
-c     cut
-c
-      Tcut = 100.0d0/hc
-c
-c     search the sph particle which pass the hypersurface at the last time
-c
-      if(frag2(i).eq.3.and.temp(i).gt.Tout) then
-      frag2(i) = 1
-      ii = ii -1
-      write(96,*) i, 'pass2'
-      else
-      endif
-
-      if(frag2(i).eq.1)then
-        if(temp(i).le.Tcut) then
-      tn2(i) = to2(i) + (Tcut-tempo2(i))/(temp(i)-tempo2(i))
-     &          *(t-to2(i))
-      entropn2(i) = entropo2(i) + (Tcut-tempo2(i))/(temp(i)-tempo2(i))
-     &             *(entrop(i)-entropo2(i))
-      sn2(i) = so2(i) + (Tcut-tempo2(i))/(temp(i)-tempo2(i))
-     &   *(s(i)-so2(i))
-      refn2(i) = refo2(i) + (Tcut-tempo2(i))/(temp(i)-tempo2(i))
-     &   *(ref(i)-refo2(i))
-      thetan2(i) = thetao2(i) + (Tout-tempo2(i))/(temp(i)-tempo2(i))
-     &   *(theta(i)-thetao2(i))
-
-      do k=1,ndim
-      xn2(k,i) = xo2(k,i)
-     &    + (Tcut-tempo2(i))/(temp(i)-tempo2(i))*(x(k,i)-xo2(k,i))
-      vn2(k,i) = vo2(k,i)
-     &    + (Tcut-tempo2(i))/(temp(i)-tempo2(i))*(v(k,i)-vo2(k,i))
-      gradP2n2(k,i) = gradP2o2(k,i) + (Tout-tempo2(i))
-     &   /(temp(i)-tempo2(i))*(gradP2(k,i)-gradP2o2(k,i))
-      f1n2(k,i) = f1o2(k,i)
-     &    + (Tcut-tempo2(i))/(temp(i)-tempo2(i))*(f1(k,i)-f1o2(k,i))
-        do l=1,ndim
-          dun2(k,l,i) = duo2(k,l,i)
-     &    + (Tout-tempo2(i))/(temp(i)-tempo2(i))*(du(k,l,i)-duo2(k,l,i))
-        end do
-      end do
-        
-      frag2(i) = 3
-      ii=ii+1
-      write(*,*)ii
-
-      else
-        
-      tempo2(i) = temp(i)
-      to2(i) = t
-      entropo2(i) = entrop(i)
-      so2(i) = s(i)
-      refo2(i) = ref(i)
-      thetao2(i) = theta(i)
-
-        do k=1,ndim
-          xo2(k,i) = x(k,i)
-          vo2(k,i) = v(k,i)
-          gradP2o2(k,i) = gradP2(k,i)
-          f1o2(k,i) = f1(k,i)
-            do l=1,ndim
-              duo2(k,l,i) = du(k,l,i)
+              gradP2n(k,i) = gradP2o(k,i) + 
+        & (Tout-tempo(i))/(temp(i)-tempo(i))*(gradP2(k,i)-gradP2o(k,i))
+              f1n(k,i) = f1o(k,i) 
+               & +(Tout-tempo(i))/(temp(i)-tempo(i))*(f1(k,i)-f1o(k,i))
+           
+              do l=1,ndim
+                dun(k,l,i) = duo(k,l,i) 
+           & + (Tout-tempo(i))/(temp(i)-tempo(i))*(du(k,l,i)-duo(k,l,i))
+              end do
             end do
-        end do
-        
+            
+            frag(i) = 3
+          else
+            tempo(i) = temp(i)
+            to(i) = t
+            entropo(i) = entrop(i)
+            so(i) = s(i)
+            refo(i) = ref(i)
+            thetao(i) = theta(i)
+            do k=1,ndim
+              xo(k,i) = x(k,i)
+              vo(k,i) = v(k,i)
+              gradP2o(k,i) = gradP2(k,i)
+              f1o(k,i) = f1(k,i)
+              do l=1,ndim
+                duo(k,l,i) = du(k,l,i)
+              end do
+            end do
+          endif
+        else
+        end if
+            
+        Tcut = 100.0d0/hc ! cut
+c        
+c     search the sph part which pass the hypersurface at the last time
+c       
+        if(frag2(i).eq.3.and.temp(i).gt.Tout) then
+          frag2(i) = 1
+          ii = ii -1
+          write(96,*) i, 'pass2'
+        else
         endif
-
-      else
-      end if
-
-      if(ii.eq.npart) goto 1111
-
+      
+        if(frag2(i).eq.1)then
+          if(temp(i).le.Tcut) then
+            tn2(i) = to2(i) + (Tcut-tempo2(i))/(temp(i)-tempo2(i))
+                  & *(t-to2(i))
+          entropn2(i) = entropo2(i)+(Tcut-tempo2(i))/(temp(i)-tempo2(i))
+                & *(entrop(i)-entropo2(i))
+            sn2(i) = so2(i) + (Tcut-tempo2(i))/(temp(i)-tempo2(i))
+                  & *(s(i)-so2(i))
+            refn2(i) = refo2(i) + (Tcut-tempo2(i))/(temp(i)-tempo2(i))
+                  & *(ref(i)-refo2(i))
+            thetan2(i) = thetao2(i)+(Tout-tempo2(i))/(temp(i)-tempo2(i))
+                     & *(theta(i)-thetao2(i))
+            do k=1,ndim
+              xn2(k,i) = xo2(k,i)
+                &+(Tcut-tempo2(i))/(temp(i)-tempo2(i))*(x(k,i)-xo2(k,i))
+              vn2(k,i) = vo2(k,i)
+                &+(Tcut-tempo2(i))/(temp(i)-tempo2(i))*(v(k,i)-vo2(k,i))
+              gradP2n2(k,i) = gradP2o2(k,i) + (Tout-tempo2(i))
+                      & /(temp(i)-tempo2(i))*(gradP2(k,i)-gradP2o2(k,i))
+              f1n2(k,i) = f1o2(k,i)
+              &+(Tcut-tempo2(i))/(temp(i)-tempo2(i))*(f1(k,i)-f1o2(k,i))
+              do l=1,ndim
+                dun2(k,l,i) = duo2(k,l,i)
+          &+(Tout-tempo2(i))/(temp(i)-tempo2(i))*(du(k,l,i)-duo2(k,l,i))
+              end do
+            end do
+            
+            frag2(i) = 3
+            ii=ii+1
+            write(*,*)ii
+          else
+            tempo2(i) = temp(i)
+            to2(i) = t
+            entropo2(i) = entrop(i)
+            so2(i) = s(i)
+            refo2(i) = ref(i)
+            thetao2(i) = theta(i)
+            do k=1,ndim
+              xo2(k,i) = x(k,i)
+              vo2(k,i) = v(k,i)
+              gradP2o2(k,i) = gradP2(k,i)
+              f1o2(k,i) = f1(k,i)
+              do l=1,ndim
+                duo2(k,l,i) = du(k,l,i)
+              end do
+            end do
+          endif
+        else
+        end if
+      
+        if(ii.eq.npart) goto 1111
       end do
       
- 1111 continue
-
+1111  continue
+       
       if(ii.eq.npart) then
-
-      do i=1,npart
-      if(frag(i).eq.3) then
-      write(unit=92,fmt=10) tn(i),xn(1,i),xn(2,i),xn(3,i),vn(1,i),
-     &                vn(2,i),vn(3,i),
-     &                entropn(i),gradP2n(1,i),gradP2n(2,i),gradP2n(3,i),
-     &                dun(1,1,i),dun(1,2,i),dun(2,1,i),dun(2,2,i),
-     &                f1n(1,i),f1n(2,i),thetan(i),0.0d0,0.0d0,0.0d0,
-     &                0.0d0,0.0d0,sigma(i),sn(i),refn(i)
-      else
-      endif
-      if(frag2(i).eq.3) then
-      write(unit=95,fmt=10) tn2(i),xn2(1,i),xn2(2,i),xn2(3,i),vn2(1,i),
-     &            vn2(2,i),vn2(3,i),
-     &            entropn2(i),gradP2n2(1,i),gradP2n2(2,i),gradP2n2(3,i),
-     &            dun2(1,1,i),dun2(1,2,i),dun2(2,1,i),dun2(2,2,i),
-     &            f1n2(1,i),f1n2(2,i),thetan2(i),0.0d0,0.0d0,0.0d0,
-     &            0.0d0,0.0d0,sigma(i),sn2(i),refn2(i)
-      else
-      endif
-      enddo
-
-      stop
-
+        do i=1,npart
+          if(frag(i).eq.3) then
+            write(unit=92,fmt=10) tn(i),xn(1,i),xn(2,i),xn(3,i),vn(1,i),
+                                 & vn(2,i),vn(3,i),
+                    & entropn(i),gradP2n(1,i),gradP2n(2,i),gradP2n(3,i),
+                    & dun(1,1,i),dun(1,2,i),dun(2,1,i),dun(2,2,i),
+                    & f1n(1,i),f1n(2,i),thetan(i),0.0d0,0.0d0,0.0d0,
+                    & 0.0d0,0.0d0,sigma(i),sn(i),refn(i)
+          else
+          endif
+          
+          if(frag2(i).eq.3) then
+            write(unit=95,fmt=10) tn2(i),xn2(1,i),xn2(2,i),
+                                & xn2(3,i),vn2(1,i),vn2(2,i),vn2(3,i),
+                & entropn2(i),gradP2n2(1,i),gradP2n2(2,i),gradP2n2(3,i),
+                & dun2(1,1,i),dun2(1,2,i),dun2(2,1,i),dun2(2,2,i),
+                & f1n2(1,i),f1n2(2,i),thetan2(i),0.0d0,0.0d0,0.0d0,
+                & 0.0d0,0.0d0,sigma(i),sn2(i),refn2(i)
+          else
+          endif
+        enddo
+        
+        stop
       else
       endif
 
 10    format (30(1x,E12.4))
-
-	return
-
-	end
-
+      return
+      end
+       
 c==========================================
-      subroutine out(x,u,entrop,sigma,ref,t,
-     &               esum,esum0,ez,bulk,shear,
-     &               rmin,rmax,dr,link,lead,outfile)
+      subroutine out(x,u,entrop,sigma,ref,t,esum,esum0,ez,bulk,shear,
+                  &  rmin,rmax,dr,link,lead,outfile)
 c==========================================
       implicit none
       character*7 outfile
@@ -1609,15 +1592,15 @@ c==========================================
       parameter (ndim=3,npart=10648,imax=100)
       integer i,j,k
       double precision x(ndim,npart),v(ndim,npart),u(ndim,npart),
-     &                 gm(3,3),gmd(3,3)
+                     & gm(3,3),gmd(3,3)
       double precision entrop(npart),entalp(npart),press(npart),
-     &                 gammaloren(npart),temp(npart),dwds(npart),
-     &                 sigma(npart),ref(npart)
+                     & gammaloren(npart),temp(npart),dwds(npart),
+                     & sigma(npart),ref(npart)
       double precision t,esum,esum0,ez,hc,gam
       double precision link(npart),rmin(ndim),rmax(ndim),wgt(npart),
-     &                 dr(ndim),shaa(npart)
+                     & dr(ndim),shaa(npart)
       double precision lead(-3:imax,-3:imax,-3:imax)
-c      double precision lead(-3:imax,-3:imax)
+c     double precision lead(-3:imax,-3:imax)
       double precision bulk(npart),sphbulk(npart)
       double precision shear(3,3,npart),sphshear(3,3,npart)
       double precision shear00(npart)
@@ -1628,91 +1611,84 @@ c      double precision lead(-3:imax,-3:imax)
       write(6,*) 'Writing output...'
 
       open(unit=33,file=outfile)
-
+ 
       do i=1,3
-	do j=1,3
-	  gm(i,j) = 0.0d0
-	enddo
+        do j=1,3
+          gm(i,j) = 0.0d0
+        enddo
       enddo
-
-	gm(1,1) = -1.0d0
-	gm(2,2) = -1.0d0
-	gm(3,3) = -1.0d0/t**2
-
+      
+      gm(1,1) = -1.0d0
+      gm(2,2) = -1.0d0
+      gm(3,3) = -1.0d0/t**2
+      
       do i=1,3
-	do j=1,3
-	  gmd(i,j) = 0.0d0
-	enddo
+        do j=1,3
+	        gmd(i,j) = 0.0d0
+        enddo
       enddo
-
-	gmd(1,1) = -1.0d0
-	gmd(2,2) = -1.0d0
-	gmd(3,3) = -t**2
-
+      
+      gmd(1,1) = -1.0d0
+      gmd(2,2) = -1.0d0
+      gmd(3,3) = -t**2
+      
       do i=1,npart
-	  gammaloren(i) = 1.0d0
-	do j=1,3
-	  gammaloren(i) = gammaloren(i)-u(j,i)*u(j,i)*gm(j,j)
-	end do
-	  gammaloren(i) = dsqrt(gammaloren(i))
-	do j= 1,3
-	  v(j,i) = u(j,i)/gammaloren(i)*gm(j,j)
-	end do
+        gammaloren(i) = 1.0d0
+        do j=1,3
+          gammaloren(i) = gammaloren(i)-u(j,i)*u(j,i)*gm(j,j)
+        end do
+        gammaloren(i) = dsqrt(gammaloren(i))
+	      do j= 1,3
+	        v(j,i) = u(j,i)/gammaloren(i)*gm(j,j)
+	      end do
       end do
 
-
       do i=1,npart
-	wgt(i) = sigma(i)
+        wgt(i) = sigma(i)
       end do
-	call sum(ref,wgt,x,rmin,rmax,dr,link,lead)
-
+      call sum(ref,wgt,x,rmin,rmax,dr,link,lead)
+      
       do i=1,npart
-	wgt(i) = sigma(i)*bulk(i)/gammaloren(i)/t
+        wgt(i) = sigma(i)*bulk(i)/gammaloren(i)/t
       end do
-	call sum(sphbulk,wgt,x,rmin,rmax,dr,link,lead)
+      call sum(sphbulk,wgt,x,rmin,rmax,dr,link,lead)
 
       do j=1,3
-	do k=1,3
-
-	  do i=1,npart
-	    wgt(i) = sigma(i)*shear(j,k,i)/gammaloren(i)/t
+        do k=1,3
+          do i=1,npart
+            wgt(i) = sigma(i)*shear(j,k,i)/gammaloren(i)/t
           end do
-	    call sum(shaa,wgt,x,rmin,rmax,dr,link,lead)
-	  do i=1,npart
-	    sphshear(j,k,i) = shaa(i)
-	  end do
-
-	end do
+          call sum(shaa,wgt,x,rmin,rmax,dr,link,lead)
+          do i=1,npart
+            sphshear(j,k,i) = shaa(i)
+          end do
+        end do
       end do
 
       esum=0.0d0
-
       do i=1,npart
-
         shear00(i) = -(v(3,i)*t)**2*( sphshear(1,1,i)+sphshear(2,2,i) )
         do j=1,2
-	  shear00(i) = shear00(i)
-     &    + 2.0d0*v(3,i)*v(j,i)*sphshear(j,3,i)
-	    do k=1,2
-        shear00(i) = shear00(i)
-     &	+ v(j,i)*v(k,i)*sphshear(j,k,i)
-            end do
-	end do
-      shear00(i) = shear00(i)/(1.0d0 - (t*v(3,i))**2)
+          shear00(i) = shear00(i)
+          & + 2.0d0*v(3,i)*v(j,i)*sphshear(j,3,i)
+          do k=1,2
+            shear00(i) = shear00(i)
+                      & + v(j,i)*v(k,i)*sphshear(j,k,i)
+          end do
+        end do
+        shear00(i) = shear00(i)/(1.0d0 - (t*v(3,i))**2)
+        call eqstate(entrop(i),press(i),temp(i),entalp(i),dwds(i))
+        
+        esum = esum + sigma(i)*t/ref(i)*
+          & ( (entalp(i) + sphbulk(i) )*gammaloren(i)*gammaloren(i) 
+          & - press(i) - sphbulk(i) + shear00(i) )
 
-      call eqstate(entrop(i),press(i),temp(i),entalp(i),dwds(i))
-
-      esum = esum + sigma(i)*t/ref(i)*
-     &       ( (entalp(i) + sphbulk(i) )*gammaloren(i)*gammaloren(i) 
-     &         - press(i) - sphbulk(i) + shear00(i) )
-
-      write(unit=33,fmt=10) x(1,i),x(2,i),x(3,i),v(1,i),v(2,i),v(3,i),
-     &                entrop(i),temp(i)*hc,press(i)*hc,sphbulk(i)*hc,
-     &                shear00(i)*hc,shear(1,2,i)*hc,shear(1,1,i)*hc,
-     &                shear(2,2,i)*hc
-      
+        write(unit=33,fmt=10) x(1,i),x(2,i),x(3,i),v(1,i),v(2,i),v(3,i),
+                      & entrop(i),temp(i)*hc,press(i)*hc,sphbulk(i)*hc,
+                      & shear00(i)*hc,shear(1,2,i)*hc,shear(1,1,i)*hc,
+                      & shear(2,2,i)*hc
       end do
-
+      
       if(esum0.eq.0.0d0) esum0=esum
 
       write(6,*) esum+ez,(esum0-esum-ez)/esum0
@@ -1720,8 +1696,5 @@ c      double precision lead(-3:imax,-3:imax)
       write(34,10) t,esum+ez,(esum0-esum-ez)/esum0
 
 10    format (20(1x,E12.4))
-
       return
-
       end 
-

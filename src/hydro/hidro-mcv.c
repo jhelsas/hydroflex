@@ -13,6 +13,7 @@
 #include "utilities.h"
 
 #define EoS EoS_qg
+
 /*
 int custom_print(int argc,char **argv,int D,double t,SPHeq_list *sph_eq,
                  double *displ,int Nspecies, double h, double kh,Box *lbox,

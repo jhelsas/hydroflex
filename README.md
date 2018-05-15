@@ -1,8 +1,8 @@
-# hydroflex
+# Hydroflex
 Temporary repository to relativistic SPH code
 
-## Authors: José Hugo Elsas, Rafael Derradi 
-## Colaborators: Takeshi Kodama, Tomoi Koide
+## Author: José Hugo Elsas
+## Colaborators: Rafael Derradi, Takeshi Kodama, Tomoi Koide
 
 Related publications: 
    - Gaspar Elsas, J. H. , Koide, T. and Kodama, T. . Noether’s Theorem of Relativistic-Electromagnetic
